@@ -1,0 +1,20 @@
+{
+  "name": "splitbrain/blogrng",
+  "autoload": {
+    "psr-4": {
+      "splitbrain\\blogrng\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Andreas Gohr",
+      "email": "andi@splitbrain.org"
+    }
+  ],
+  "require": {
+    "simplepie/simplepie": "^1.5",
+    "ext-pdo": "*",
+    "splitbrain/php-cli": "^1.1",
+    "psr/log": "^2"
+  }
+}
