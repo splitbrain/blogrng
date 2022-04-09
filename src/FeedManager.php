@@ -25,22 +25,22 @@ class FeedManager
     /**
      * Get a random entry, that is not part of the given exclude list
      *
-     * @param int[] $exclude
+     * @param int[] $seenPostIDs
      * @return array
      */
-    public function getRandom($exclude = [])
+    public function getRandom($seenPostIDs = [])
     {
-        $exclude = array_map('intval', $exclude);
-        $exclude = join(',', $exclude);
+        $seenPostIDs = array_map('intval', $seenPostIDs);
+        $seenPostIDs = join(',', $seenPostIDs);
 
         $mindate = time() - 60 * 60 * 24 * 30 * 6; // last six months
 
         $sql = "
-            SELECT A.ROWID, A.*
+            SELECT A.*
              FROM items A, feeds B
             WHERE A.feedid = B.feedid
               AND B.errors = 0
-              AND A.ROWID NOT IN ($exclude)
+              AND A.itemid NOT IN ($seenPostIDs)
               AND A.published > $mindate
          ORDER BY random()
             LIMIT 1
@@ -48,6 +48,30 @@ class FeedManager
 
         $result = $this->db->query($sql);
         return $result[0];
+    }
+
+    /**
+     * getInfo about the last seen pages, based on passed IDs
+     * 
+     * @param int[] $seenIDs
+     * @return array|false
+     */
+    public function getLastSeen($seenPostIDs) {
+        $seenPostIDs = array_map('intval', $seenPostIDs);
+        $seenPostIDs = join(',', $seenPostIDs);
+
+        $sql = "
+           SELECT *, 
+                  A.url as itemurl,
+                  A.title as itemtitle,
+                  B.url as feedurl,
+                  B.title as feedtitle
+             FROM items A, feeds B
+            WHERE A.feedid = B.feedid
+              AND A.itemid IN ($seenPostIDs)
+        ";
+
+        return $this->db->query($sql);
     }
 
     /**
@@ -133,7 +157,7 @@ class FeedManager
                     'url' => $itemUrl,
                     'title' => $itemTitle,
                     'published' => $itemDate,
-                ]);
+                ], false);
             }
             $this->db->query('COMMIT');
 

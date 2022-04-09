@@ -1,0 +1,26 @@
+{% extends 'partials/layout.twig' %}
+
+{% block content %}
+    <h2>👋 Hi there!</h2>
+
+    <p>
+        This website lets you randomly explore the IndieWeb. Simply click the button below and you
+        will be redirected to a random post from a personal blog.
+    </p>
+
+    <p style="text-align: center;">
+        <a href="random" target="_blank" id="stumble">
+            <button>🎲 Open Random Blog Post</button>
+        </a>
+    </p>
+
+    <p>
+        <i>Hint:</i> you can drag the button to your bookmarks and have it always available when you want to be
+        inspired.
+    </p>
+
+    <div id="seen">
+        {% include 'partials/seen.twig' %}
+    </div>
+
+{% endblock %}

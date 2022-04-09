@@ -11,10 +11,16 @@
       "email": "andi@splitbrain.org"
     }
   ],
+  "config": {
+    "platform": {
+      "php": "7.4"
+    }
+  },
   "require": {
     "simplepie/simplepie": "^1.5",
     "ext-pdo": "*",
     "splitbrain/php-cli": "^1.1",
-    "psr/log": "^2"
+    "psr/log": "^1.1",
+    "twig/twig": "^3.3"
   }
 }

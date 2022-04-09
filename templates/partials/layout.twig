@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="simple.min.css">
+    <title>Indy Weblog RNG</title>
+</head>
+<body>
+<header>
+    <h1>indieblog.page</h1>
+    <p>Discover the indieweb, one blog post at a time.</p>
+
+    {% include 'partials/navigation.twig' %}
+</header>
+
+<main>
+    {% block content %}
+    {% endblock %}
+</main>
+
+<footer>
+    <p>
+        This is a personal project by <a href="https://www.splitbrain.org">Andreas Gohr</a>.
+        It is free of any trackers and advertising. JavaScript and cookies are optional.
+        If you like what you see, you can
+        <a href="https://github.com/sponsors/splitbrain">sponsor me on Github</a> or
+        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=andi%40splitbrain.org&item_name=Thank+you&no_shipping=1&no_note=1&tax=0&currency_code=EUR&lc=US">donate
+            via Paypal</a>. 💖️
+    </p>
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+</html>

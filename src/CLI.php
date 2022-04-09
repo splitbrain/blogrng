@@ -52,7 +52,7 @@ class CLI extends PSR3CLI
     {
         try {
             $feed = $this->feedManager->addFeed($feedurl);
-            $this->success('[{fid}] {title}', $feed);
+            $this->success('[{feedid}] {title}', $feed);
             return 0;
         } catch (Exception $e) {
             $this->error($e->getMessage());

@@ -18,7 +18,6 @@ class DataBase
             null,
             null,
             [
-                \PDO::ATTR_PERSISTENT => true,
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
             ]
         );
@@ -50,10 +49,10 @@ class DataBase
      *
      * @param string $table
      * @param array $data
+     * @param bool $replace Conflict resolution, replace or ignore
      * @return void
-     * @throws \PDOException
      */
-    public function saveRecord($table, $data)
+    public function saveRecord($table, $data, $replace = true)
     {
         $columns = array_map(function ($column) {
             return '"' . $column . '"';
@@ -61,8 +60,14 @@ class DataBase
         $values = array_values($data);
         $placeholders = array_pad([], count($columns), '?');
 
+        if ($replace) {
+            $command = 'REPLACE';
+        } else {
+            $command = 'INSERT OR IGNORE';
+        }
+
         /** @noinspection SqlResolve */
-        $sql = 'REPLACE INTO "' . $table . '" (' . join(',', $columns) . ') VALUES (' . join(',', $placeholders) . ')';
+        $sql = $command . ' INTO "' . $table . '" (' . join(',', $columns) . ') VALUES (' . join(',', $placeholders) . ')';
         $stm = $this->db->prepare($sql);
         $stm->execute($values);
         $stm->closeCursor();

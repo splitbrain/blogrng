@@ -1,0 +1,67 @@
+{% extends 'partials/layout.twig' %}
+
+{% block content %}
+    <h2>Frequently asked Questions</h2>
+
+    <p>
+        These questions might have been asked frequently if I hadn't answered them here ;-)
+    </p>
+
+    <details>
+        <summary>Why does this site exist?</summary>
+
+        <p>Because I wanted it.</p>
+
+        <p>
+            There is a small renaissance of having your own, personal website, independent of the
+            large corporate entities. A place for your thoughts and ideas that you own and control. It's often called
+            the <a href="https://indieweb.org/">IndieWeb</a> or
+            <a href="https://communitywiki.org/wiki/SmolNet">SmoNet</a> - back in my day it was called having a
+            homepage. Later we called it a blog or weblog.
+        </p>
+
+        <p>
+            I love reading texts written by real people. Texts that don't want to sell something.
+            But how can you discover texts you can't search for?
+        </p>
+
+        <p>
+            That's where this page comes into. Click a button, be surprised and maybe discover your new favorite thing.
+        </p>
+    </details>
+
+    <details>
+        <summary>What are the sources?</summary>
+
+        <p>I initially seeded the database with personal websites from the following sources:</p>
+
+        <ul>
+            <li><a href="https://personalsit.es">personalsit.es</a></li>
+            <li><a href="https://news.ycombinator.com/item?id=30934529">Ask HN: Share your personal site</a> and the
+                helpful <a href="https://news.ycombinator.com/item?id=30963947">list of URLs extracted</a> from that
+                post
+            </li>
+            <li><a href="https://xn--sr8hvo.ws/directory">The IndieWeb Webring</a></li>
+        </ul>
+
+        <p>
+            To further grow it, you can suggest your own a friend's personal site (as long as it has an RSS feed):
+            <a href="suggest">Suggest a page</a>.
+        </p>
+    </details>
+
+
+    <details>
+        <summary>What tech does this run on?</summary>
+
+        <p>This is a very simple, custom PHP application standing on the shoulders of giants:</p>
+        <ul>
+            <li><a href="https://simplepie.org/">SimplePie</a> for RSS discovery and parsing</li>
+            <li><a href="https://www.sqlite.org/">SQLite</a> for data storage</li>
+            <li><a href="https://twig.symfony.com/">Twig</a> for templating</li>
+            <li><a href="https://simplecss.org/">SimpleCSS</a> for nice looks</li>
+        </ul>
+        <p>The rest is just glue code.</p>
+    </details>
+
+{% endblock %}
