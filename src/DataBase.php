@@ -2,22 +2,16 @@
 
 namespace splitbrain\blogrng;
 
-use Psr\Log\LoggerInterface;
-
 class DataBase
 {
     /** @var \PDO */
     protected $db;
-    /** @var LoggerInterface */
-    protected $logger;
 
     /**
      * Constructor
      */
-    public function __construct($file, LoggerInterface $logger)
+    public function __construct($file)
     {
-        $this->logger = $logger;
-
         $exists = file_exists($file);
         $this->db = new \PDO(
             'sqlite:' . $file,
@@ -40,19 +34,14 @@ class DataBase
      * @param string $sql
      * @param array $params
      * @return array|false
+     * @throws \PDOException
      */
     public function query($sql, $params = [])
     {
-        try {
-            $stm = $this->db->prepare($sql);
-            $stm->execute($params);
-            $data = $stm->fetchAll(\PDO::FETCH_ASSOC);
-            $stm->closeCursor();
-        } catch (\PDOException $e) {
-            $this->logger->debug($sql);
-            $this->logger->debug(print_r($params, true));
-            throw $e;
-        }
+        $stm = $this->db->prepare($sql);
+        $stm->execute($params);
+        $data = $stm->fetchAll(\PDO::FETCH_ASSOC);
+        $stm->closeCursor();
         return $data;
     }
 
@@ -62,6 +51,7 @@ class DataBase
      * @param string $table
      * @param array $data
      * @return void
+     * @throws \PDOException
      */
     public function saveRecord($table, $data)
     {
@@ -73,15 +63,9 @@ class DataBase
 
         /** @noinspection SqlResolve */
         $sql = 'REPLACE INTO "' . $table . '" (' . join(',', $columns) . ') VALUES (' . join(',', $placeholders) . ')';
-        try {
-            $stm = $this->db->prepare($sql);
-            $stm->execute($values);
-            $stm->closeCursor();
-        } catch (\PDOException $e) {
-            $this->logger->debug($sql);
-            $this->logger->debug(print_r($values, true));
-            throw $e;
-        }
+        $stm = $this->db->prepare($sql);
+        $stm->execute($values);
+        $stm->closeCursor();
     }
 
     /**
