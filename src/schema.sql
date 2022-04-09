@@ -1,8 +1,8 @@
 CREATE TABLE feeds
 (
     feedid    TEXT    NOT NULL PRIMARY KEY,
-    url       TEXT    NOT NULL,
-    title     TEXT    NOT NULL,
+    feedurl   TEXT    NOT NULL,
+    feedtitle TEXT    NOT NULL,
     homepage  TEXT    NOT NULL DEFAULT '',
     added     INTEGER NOT NULL DEFAULT 0,
     fetched   INTEGER NOT NULL DEFAULT 0,
@@ -14,9 +14,9 @@ CREATE TABLE items
 (
     itemid    INTEGER NOT NULL PRIMARY KEY,
     feedid    TEXT    NOT NULL,
-    url       TEXT    NOT NULL UNIQUE,
-    title     TEXT    NOT NULL,
+    itemurl   TEXT    NOT NULL UNIQUE,
+    itemtitle TEXT    NOT NULL,
     published INTEGER NOT NULL,
-    FOREIGN KEY (feedid) REFERENCES feeds (feedid)
+    FOREIGN KEY (feedid) REFERENCES feeds (feedid) ON DELETE CASCADE
 );
 

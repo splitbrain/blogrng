@@ -38,12 +38,12 @@ class FeedManager
         $mindate = time() - self::MAXAGE;
 
         $sql = "
-            SELECT A.*
-             FROM items A, feeds B
-            WHERE A.feedid = B.feedid
-              AND B.errors = 0
-              AND A.itemid NOT IN ($seenPostIDs)
-              AND A.published > $mindate
+            SELECT *
+             FROM items I, feeds F
+            WHERE I.feedid = F.feedid
+              AND F.errors = 0
+              AND I.itemid NOT IN ($seenPostIDs)
+              AND I.published > $mindate
          ORDER BY random()
             LIMIT 1
              ";
@@ -64,14 +64,10 @@ class FeedManager
         $seen = join(',', $seenPostIDs);
 
         $sql = "
-           SELECT *, 
-                  A.url as itemurl,
-                  A.title as itemtitle,
-                  B.url as feedurl,
-                  B.title as feedtitle
-             FROM items A, feeds B
-            WHERE A.feedid = B.feedid
-              AND A.itemid IN ($seen)
+           SELECT * 
+             FROM items I, feeds F
+            WHERE I.feedid = F.feedid
+              AND I.itemid IN ($seen)
         ";
 
         $result = $this->db->query($sql);
@@ -112,6 +108,32 @@ class FeedManager
     }
 
     /**
+     * Get a single feed record
+     *
+     * @param string $feedid
+     * @return array|false
+     */
+    public function getFeed($feedid)
+    {
+        $sql = "SELECT * FROM feeds WHERE feedid = ?";
+        $result = $this->db->query($sql, [$feedid]);
+        if ($result) $result = $result[0];
+        return $result;
+    }
+
+    /**
+     * @param $itemid
+     * @return array|false
+     */
+    public function getItem($itemid)
+    {
+        $sql = "SELECT * FROM items I, feeds F WHERE I.feedid = F.feedid AND I.itemid = ?";
+        $result = $this->db->query($sql, [$itemid]);
+        if ($result) $result = $result[0];
+        return $result;
+    }
+
+    /**
      * Adds a new feed
      *
      * @param string $url Either the feed itself or a website (using autodiscovery)
@@ -131,9 +153,9 @@ class FeedManager
         $fid = $this->feedID($url);
         $feed = [
             'feedid' => $fid,
-            'url' => $url,
+            'feedurl' => $url,
             'homepage' => $simplePie->get_permalink(),
-            'title' => $simplePie->get_title(),
+            'feedtitle' => $simplePie->get_title(),
             'added' => time(),
 
         ];
@@ -161,6 +183,17 @@ class FeedManager
     }
 
     /**
+     * Get all feeds
+     *
+     * @return array
+     */
+    public function getAllFeeds()
+    {
+        $query = "SELECT * FROM feeds WHERE errors = 0 ORDER BY feedurl";
+        return $this->db->query($query);
+    }
+
+    /**
      * Fetch items of the given Feed Record
      *
      * @throws Exception|PDOException
@@ -169,17 +202,18 @@ class FeedManager
     {
         $simplePie = new SimplePie();
         $simplePie->cache = false;
-        $simplePie->set_feed_url($feed['url']);
+        $simplePie->set_feed_url($feed['feedurl']);
         $simplePie->force_feed(true); // no autodetect here
-        if (!$simplePie->init()) {
-            throw new Exception($simplePie->error());
-        }
 
-        $items = $simplePie->get_items();
-        if (!$items) return 0;
-
-        $this->db->query('BEGIN');
         try {
+            if (!$simplePie->init()) {
+                throw new Exception($simplePie->error());
+            }
+
+            $items = $simplePie->get_items();
+            if (!$items) throw new Exception('no items found');
+
+            $this->db->pdo()->beginTransaction();
             foreach ($items as $item) {
                 $itemUrl = $item->get_permalink();
                 if (!$itemUrl) continue;
@@ -188,23 +222,26 @@ class FeedManager
                 $itemDate = $item->get_gmdate('U');
                 if (!$itemDate) $itemDate = time();
 
-
-                $this->db->saveRecord('items', [
+                $record = [
                     'feedid' => $feed['feedid'],
-                    'url' => $itemUrl,
-                    'title' => $itemTitle,
+                    'itemurl' => $itemUrl,
+                    'itemtitle' => $itemTitle,
                     'published' => $itemDate,
-                ], false);
+                ];
+
+                $this->db->saveRecord('items', $record, false);
             }
-            $this->db->query('COMMIT');
+            $this->db->pdo()->commit();
 
             // reset any errors
             $feed['errors'] = 0;
             $feed['lasterror'] = '';
             $feed['fetched'] = time();
             $this->db->saveRecord('feeds', $feed);
-        } catch (PDOException $e) {
-            $this->db->query('ROLLBACK');
+        } catch (Exception $e) {
+            if ($this->db->pdo()->inTransaction()) {
+                $this->db->pdo()->rollBack();
+            }
 
             // save the error
             $feed['errors']++;
@@ -218,6 +255,23 @@ class FeedManager
         return count($items);
     }
 
+    /**
+     * Delete a feed and all its items
+     *
+     * @param $feedID
+     * @return void
+     * @throws Exception
+     */
+    public function deleteFeed($feedID)
+    {
+        $feed = $this->getFeed($feedID);
+        if (!$feed) throw new \Exception('Feed does not exist');
+
+        $this->db->pdo()->exec('PRAGMA foreign_keys = ON');
+        $sql = "DELETE FROM feeds WHERE feedid = ?";
+        $this->db->query($sql, [$feedID]);
+        $this->db->pdo()->exec('PRAGMA foreign_keys = OFF');
+    }
 
     /**
      * Create a ID for the given feed

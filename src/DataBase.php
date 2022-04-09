@@ -27,6 +27,10 @@ class DataBase
         }
     }
 
+    public function pdo() {
+        return $this->db;
+    }
+
     /**
      * Simple query abstraction
      *

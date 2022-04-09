@@ -81,12 +81,19 @@ class Controller
     {
         $post = $this->feedManager->getRandom($this->cookieManager->getSeenPostIDs());
         $this->cookieManager->addSeenPostID($post['itemid']);
-        header('Location: ' . $post['url']);
+        header('Location: ' . $post['itemurl']);
     }
 
     public function seen()
     {
         $seen = $this->feedManager->getLastSeen($this->cookieManager->getSeenPostIDs());
         echo $this->twig->render('partials/seen.twig', ['seen' => $seen]);
+    }
+
+    public function export()
+    {
+        $all = $this->feedManager->getAllFeeds();
+        header('Content-Type: application/json');
+        echo json_encode($all);
     }
 }
