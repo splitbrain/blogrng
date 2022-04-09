@@ -14,6 +14,8 @@ class FeedManager
     /** @var DataBase */
     protected $db;
 
+    const MAXAGE = 60 * 60 * 24 * 30 * 6; // last six months
+
     /**
      * Constructor
      */
@@ -33,7 +35,7 @@ class FeedManager
         $seenPostIDs = array_map('intval', $seenPostIDs);
         $seenPostIDs = join(',', $seenPostIDs);
 
-        $mindate = time() - 60 * 60 * 24 * 30 * 6; // last six months
+        $mindate = time() - self::MAXAGE;
 
         $sql = "
             SELECT A.*
@@ -52,13 +54,14 @@ class FeedManager
 
     /**
      * getInfo about the last seen pages, based on passed IDs
-     * 
+     *
      * @param int[] $seenIDs
      * @return array|false
      */
-    public function getLastSeen($seenPostIDs) {
+    public function getLastSeen($seenPostIDs)
+    {
         $seenPostIDs = array_map('intval', $seenPostIDs);
-        $seenPostIDs = join(',', $seenPostIDs);
+        $seen = join(',', $seenPostIDs);
 
         $sql = "
            SELECT *, 
@@ -68,10 +71,44 @@ class FeedManager
                   B.title as feedtitle
              FROM items A, feeds B
             WHERE A.feedid = B.feedid
-              AND A.itemid IN ($seenPostIDs)
+              AND A.itemid IN ($seen)
         ";
 
-        return $this->db->query($sql);
+        $result = $this->db->query($sql);
+        $result = array_column($result, null, 'itemid');
+
+        // sort by the given order
+        $data = [];
+        foreach ($seenPostIDs as $id) {
+            if (isset($result[$id])) $data[] = $result[$id];
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get info about the database
+     *
+     * @return array
+     */
+    public function getStats()
+    {
+        $stats = [];
+
+        $sql = "SELECT COUNT(*) FROM feeds WHERE errors = 0";
+        $stats['feeds'] = $this->db->queryValue($sql);
+
+
+        $sql = "SELECT COUNT(*) FROM items A, feeds B
+            WHERE A.feedid = B.feedid AND B.errors = 0";
+        $stats['items'] = $this->db->queryValue($sql);
+
+        $mindate = time() - self::MAXAGE;
+        $sql = "SELECT COUNT(*) FROM items A, feeds B
+            WHERE A.feedid = B.feedid AND B.errors = 0 AND A.published > $mindate";
+        $stats['recentitems'] = $this->db->queryValue($sql);
+
+        return $stats;
     }
 
     /**

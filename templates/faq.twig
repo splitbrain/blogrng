@@ -52,6 +52,23 @@
 
 
     <details>
+        <summary>How many blogs and posts are in the database?</summary>
+
+        <p>I initially seeded the database with personal websites from the following sources:</p>
+
+        <ul>
+            <li><b>{{ stats.feeds }}</b> Websites with a feed</li>
+            <li><b>{{ stats.items }}</b> posts overall</li>
+            <li><b>{{ stats.recentitems }}</b> posts in the last six months</li>
+        </ul>
+
+        <p>
+            To be somewhat fair to newcomers, only recent posts (published within the last six months) are used when
+            picking a random post.
+        </p>
+    </details>
+
+    <details>
         <summary>What tech does this run on?</summary>
 
         <p>This is a very simple, custom PHP application standing on the shoulders of giants:</p>

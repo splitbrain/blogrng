@@ -65,7 +65,11 @@ class Controller
 
     public function faq()
     {
-        echo $this->twig->render('faq.twig');
+        $context = [
+            'stats' => $this->feedManager->getStats()
+        ];
+
+        echo $this->twig->render('faq.twig', $context);
     }
 
     public function suggest()

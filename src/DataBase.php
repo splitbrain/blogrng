@@ -74,6 +74,20 @@ class DataBase
     }
 
     /**
+     * Execute a query that returns a single value
+     *
+     * @param string $sql
+     * @param array $params
+     * @return mixed|null
+     */
+    public function queryValue($sql, $params = [])
+    {
+        $result = $this->query($sql, $params);
+        if (!$result) return null;
+        return array_values($result[0])[0];
+    }
+
+    /**
      * Initializes the database from schema
      */
     protected function initTables()
