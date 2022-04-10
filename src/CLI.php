@@ -96,6 +96,7 @@ class CLI extends PSR3CLI
                 $this->debug($e->getTraceAsString());
             }
         }
+        $this->feedManager->db()->exec('VACUUM');
         return 1;
     }
 
