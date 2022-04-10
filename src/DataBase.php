@@ -155,8 +155,34 @@ class DataBase
     public function queryValue($sql, $params = [])
     {
         $result = $this->queryAll($sql, $params);
-        if (!$result) return null;
-        return array_values($result[0])[0];
+        if (is_array($result) && count($result)) return array_values($result[0])[0];
+        return null;
+    }
+
+    /**
+     * Get a config value from the opt table
+     *
+     * @param string $conf Config name
+     * @param mixed $default What to return if the value isn't set
+     * @return mixed
+     */
+    public function getOpt($conf, $default = null)
+    {
+        $value = $this->queryValue("SELECT val FROM opt WHERE conf = ?", [$conf]);
+        if ($value === null) return $default;
+        return $value;
+    }
+
+    /**
+     * Set a config value in the opt table
+     *
+     * @param $conf
+     * @param $value
+     * @return void
+     */
+    public function setOpt($conf, $value)
+    {
+        $this->exec('REPLACE INTO opt (conf,val) VALUES (?,?)', [$conf, $value]);
     }
 
     // endregion
