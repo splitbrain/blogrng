@@ -137,6 +137,48 @@ class FeedManager
     }
 
     /**
+     * Suggest a new feed
+     * 
+     * @param string $url
+     * @return array
+     * @throws Exception
+     */
+    public function suggestFeed($url)
+    {
+        $simplePie = new SimplePie();
+        $simplePie->cache = false;
+        $simplePie->set_feed_url($url);
+        if (!$simplePie->init()) {
+            throw new Exception("Sorry I couldn't find a supported feed at that URL");
+        }
+
+        $url = $simplePie->feed_url;
+        $fid = $this->feedID($url);
+        $feed = [
+            'feedid' => $fid,
+            'feedurl' => $url,
+            'homepage' => $simplePie->get_permalink(),
+            'feedtitle' => $simplePie->get_title(),
+            'added' => time(),
+        ];
+
+        $sql = "SELECT * FROM feeds WHERE feedid = ?";
+        $result = $this->db->queryRecord($sql, [$fid]);
+        if ($result) {
+            throw new Exception("This feed already exists in the database");
+        }
+
+        $sql = "SELECT * FROM suggestions WHERE feedid = ?";
+        $result = $this->db->queryRecord($sql, [$fid]);
+        if ($result) {
+            throw new Exception("This feed has already been suggested");
+        }
+
+        $this->db->saveRecord('suggestions', $feed);
+        return $feed;
+    }
+
+    /**
      * Adds a new feed
      *
      * @param string $url Either the feed itself or a website (using autodiscovery)
@@ -160,11 +202,10 @@ class FeedManager
             'homepage' => $simplePie->get_permalink(),
             'feedtitle' => $simplePie->get_title(),
             'added' => time(),
-
         ];
 
         $sql = "SELECT * FROM feeds WHERE feedid = ?";
-        $result = $this->db->queryAll($sql, [$fid]);
+        $result = $this->db->queryRecord($sql, [$fid]);
         if ($result) {
             throw new Exception("[$fid] Feed already exists");
         }

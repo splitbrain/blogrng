@@ -74,7 +74,20 @@ class Controller
 
     public function suggest()
     {
-        echo $this->twig->render('suggest.twig');
+        $context = [];
+
+        if (isset($_POST['suggest']) &&
+            preg_match('/^https?:\/\//', $_POST['suggest']) &&
+            empty($_POST['title'])) {
+
+            try {
+                $context['feed'] = $this->feedManager->suggestFeed($_POST['suggest']);
+            } catch (\Exception $e) {
+                $context['error'] = $e->getMessage();
+            }
+        }
+
+        echo $this->twig->render('suggest.twig', $context);
     }
 
     public function random()

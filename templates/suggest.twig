@@ -1,12 +1,42 @@
 {% extends 'partials/layout.twig' %}
 
 {% block content %}
-    <h2>Coming soon</h2>
+    <h2>Suggest a blog</h2>
 
     <p>
-        I want to add a form here soonish. For now, please just email me:
-        <a href="mailto:andi@splitbrain.org">andi@splitbrain.org</a>.
+        Use this form to add a new source. Just enter the URL to an RSS or ATOM feed or just a homepage link.
     </p>
+
+
+    <form action="suggest" method="post">
+        <p style="text-align: center">
+            <label for="suggesturl">Suggest a feed or blog URL:</label><br>
+            <input id="suggesturl" type="text" name="suggest" placeholder="https://example.com/feed.xml"><br>
+            <input type="text" name="title" placeholder="this is just a honeypot" style="display: none">
+            <button type="submit">Submit</button>
+        </p>
+
+        {% if error %}
+            <blockquote style="border-color: #aa0000">
+                {{ error }}
+            </blockquote>
+        {% endif %}
+
+        {% if feed %}
+            <blockquote style="border-color: #00aa00">
+                <p>Your feed as been added the list of suggestions and I will have a look at it soon.</p>
+
+                <a href="{{ feed.homepage }}">{{ feed.feedtitle }}</a>
+                <a href="{{ feed.feedurl }}" title="subscribe">
+                    <svg style="width:1.2em;height:1.2em; vertical-align: middle" viewBox="0 0 24 24">
+                        <path fill="currentColor"
+                              d="M5,3H19A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3M7.5,15A1.5,1.5 0 0,0 6,16.5A1.5,1.5 0 0,0 7.5,18A1.5,1.5 0 0,0 9,16.5A1.5,1.5 0 0,0 7.5,15M6,10V12A6,6 0 0,1 12,18H14A8,8 0 0,0 6,10M6,6V8A10,10 0 0,1 16,18H18A12,12 0 0,0 6,6Z"/>
+                    </svg>
+                </a>
+            </blockquote>
+        {% endif %}
+    </form>
+
 
     <details>
         <summary>What sites can be submitted?</summary>
