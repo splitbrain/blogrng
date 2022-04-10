@@ -1,0 +1,15 @@
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+#stumble:focus span,
+#stumble:hover span {
+    display: inline-block;
+    animation: spin 1.5s ease-in-out infinite;
+}
