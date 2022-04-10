@@ -21,7 +21,10 @@ class FeedManager
      */
     public function __construct()
     {
-        $this->db = new DataBase(__DIR__ . '/../blogrng.sqlite');
+        $this->db = new DataBase(
+            __DIR__ . '/../blogrng.sqlite',
+            __DIR__ . '/../db/'
+        );
     }
 
     /**
@@ -48,7 +51,7 @@ class FeedManager
             LIMIT 1
              ";
 
-        $result = $this->db->query($sql);
+        $result = $this->db->queryAll($sql);
         return $result[0];
     }
 
@@ -70,7 +73,7 @@ class FeedManager
               AND I.itemid IN ($seen)
         ";
 
-        $result = $this->db->query($sql);
+        $result = $this->db->queryAll($sql);
         $result = array_column($result, null, 'itemid');
 
         // sort by the given order
@@ -116,7 +119,7 @@ class FeedManager
     public function getFeed($feedid)
     {
         $sql = "SELECT * FROM feeds WHERE feedid = ?";
-        $result = $this->db->query($sql, [$feedid]);
+        $result = $this->db->queryAll($sql, [$feedid]);
         if ($result) $result = $result[0];
         return $result;
     }
@@ -128,7 +131,7 @@ class FeedManager
     public function getItem($itemid)
     {
         $sql = "SELECT * FROM items I, feeds F WHERE I.feedid = F.feedid AND I.itemid = ?";
-        $result = $this->db->query($sql, [$itemid]);
+        $result = $this->db->queryAll($sql, [$itemid]);
         if ($result) $result = $result[0];
         return $result;
     }
@@ -161,7 +164,7 @@ class FeedManager
         ];
 
         $sql = "SELECT * FROM feeds WHERE feedid = ?";
-        $result = $this->db->query($sql, [$fid]);
+        $result = $this->db->queryAll($sql, [$fid]);
         if ($result) {
             throw new Exception("[$fid] Feed already exists");
         }
@@ -179,7 +182,7 @@ class FeedManager
     {
         $limit = time() - 60 * 60 * 24;
         $query = "SELECT * FROM feeds WHERE fetched < $limit AND errors < 5 ORDER BY random()";
-        return $this->db->query($query);
+        return $this->db->queryAll($query);
     }
 
     /**
@@ -190,7 +193,7 @@ class FeedManager
     public function getAllFeeds()
     {
         $query = "SELECT * FROM feeds WHERE errors = 0 ORDER BY feedurl";
-        return $this->db->query($query);
+        return $this->db->queryAll($query);
     }
 
     /**
@@ -269,7 +272,7 @@ class FeedManager
 
         $this->db->pdo()->exec('PRAGMA foreign_keys = ON');
         $sql = "DELETE FROM feeds WHERE feedid = ?";
-        $this->db->query($sql, [$feedID]);
+        $this->db->queryAll($sql, [$feedID]);
         $this->db->pdo()->exec('PRAGMA foreign_keys = OFF');
     }
 
