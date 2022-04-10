@@ -53,12 +53,13 @@
     <details>
         <summary>How many blogs and posts are in the database?</summary>
 
-        <p>I initially seeded the database with personal websites from the following sources:</p>
+        <p>Here are the current statistics:</p>
 
         <ul>
             <li><b>{{ stats.feeds }}</b> Websites with a feed</li>
             <li><b>{{ stats.items }}</b> posts overall</li>
             <li><b>{{ stats.recentitems }}</b> posts in the last six months</li>
+            <li><b>{{ (stats.size / 1024 / 1024) |round(2) }} MiB</b> database size</li>
         </ul>
 
         <p>

@@ -117,6 +117,9 @@ class FeedManager
             WHERE A.feedid = B.feedid AND B.errors = 0 AND A.published > $mindate";
         $stats['recentitems'] = $this->db->queryValue($sql);
 
+        $sql = 'SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()';
+        $stats['size'] = $this->db->queryValue($sql);
+
         return $stats;
     }
 
