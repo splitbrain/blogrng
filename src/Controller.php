@@ -146,6 +146,14 @@ class Controller
             $this->feedManager->removeSuggestion($_REQUEST['remove']);
         }
 
+        if(isset($_REQUEST['delete'])) {
+            try {
+                $this->feedManager->deleteFeed($_REQUEST['delete']);
+            } catch (\Exception $e) {
+                $context['error'] = $e->getMessage();
+            }
+        }
+
         $context['suggestions'] = $this->feedManager->getSuggestions();
 
         echo $this->twig->render('admin.twig', $context);
