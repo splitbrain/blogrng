@@ -28,6 +28,16 @@ class FeedManager
     }
 
     /**
+     * Access to the database
+     *
+     * @return DataBase
+     */
+    public function db()
+    {
+        return $this->db;
+    }
+
+    /**
      * Get a random entry, that is not part of the given exclude list
      *
      * @param int[] $seenPostIDs
@@ -138,7 +148,7 @@ class FeedManager
 
     /**
      * Suggest a new feed
-     * 
+     *
      * @param string $url
      * @return array
      * @throws Exception
@@ -176,6 +186,29 @@ class FeedManager
 
         $this->db->saveRecord('suggestions', $feed);
         return $feed;
+    }
+
+    /**
+     * Get all the suggestions
+     *
+     * @return array
+     */
+    public function getSuggestions()
+    {
+        $sql = "SELECT * FROM suggestions ORDER BY added DESC";
+        return $this->db->queryAll($sql);
+    }
+
+    /**
+     * Delete a feed from the suggestions
+     *
+     * @param string $feedid
+     * @return void
+     */
+    public function removeSuggestion($feedid)
+    {
+        $sql = "DELETE FROM suggestions WHERE feedid = ?";
+        $this->db->exec($sql, [$feedid]);
     }
 
     /**

@@ -29,6 +29,9 @@ class CLI extends PSR3CLI
 
         $options->registerCommand('delete', 'Delete the given feed');
         $options->registerArgument('id', 'Feed id', true, 'delete');
+
+        $options->registerCommand('adminpass', 'Set the password for the web admin user');
+        $options->registerArgument('pass', 'The password to set', true, 'adminpass');
     }
 
     /** @inheritdoc */
@@ -48,6 +51,9 @@ class CLI extends PSR3CLI
                 return $this->inspect($args[0]);
             case 'delete':
                 return $this->delete($args[0]);
+            case 'adminpass':
+                $this->feedManager->db()->setOpt('adminpass', password_hash($args[0], PASSWORD_DEFAULT));
+                return 0;
             default:
                 echo $options->help();
                 return 0;

@@ -1,0 +1,30 @@
+{% extends 'partials/layout.twig' %}
+
+{% block content %}
+    <h2>Admin</h2>
+
+    <form action="admin">
+        <p>
+            URL: <input type="text" name="add" placeholder="https://example.com/feed.xml">
+            <button type="submit">Add</button>
+        </p>
+    </form>
+
+    {% include 'partials/feedback.twig' %}
+
+    <table>
+        {% for feed in suggestions %}
+            <tr>
+                <td>
+                    <a href="{{ feed.homepage }}">{{ feed.feedtitle }}</a>
+                </td>
+                <td>
+                    <a href="admin?remove={{ feed.feedid }}"><button>Remove</button></a>
+                    <a href="admin?add={{ feed.feedurl }}"><button>Add</button></a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+
+{% endblock %}

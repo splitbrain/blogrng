@@ -48,6 +48,22 @@ class Controller
         }
     }
 
+    /**
+     * Ensure only superuser may continue
+     */
+    protected function requireAuth()
+    {
+        if (
+            !isset($_SERVER['PHP_AUTH_PW']) ||
+            !password_verify($_SERVER['PHP_AUTH_PW'], $this->feedManager->db()->getOpt('adminpass', ''))
+        ) {
+            header('WWW-Authenticate: Basic realm="My Realm"');
+            header('HTTP/1.0 401 Unauthorized');
+            echo $this->twig->render('401.twig');
+            exit;
+        }
+    }
+
     public function notFound()
     {
         http_response_code(404);
@@ -108,5 +124,30 @@ class Controller
         $all = $this->feedManager->getAllFeeds();
         header('Content-Type: application/json');
         echo json_encode($all);
+    }
+
+    public function admin()
+    {
+        $this->requireAuth();
+        $context = [];
+
+
+
+        if(isset($_REQUEST['add'])) {
+            try {
+                $context['feed'] = $this->feedManager->addFeed($_REQUEST['add']);
+                $this->feedManager->removeSuggestion($context['feed']['feedid']);
+            } catch (\Exception $e) {
+                $context['error'] = $e->getMessage();
+            }
+        }
+
+        if(isset($_REQUEST['remove'])) {
+            $this->feedManager->removeSuggestion($_REQUEST['remove']);
+        }
+
+        $context['suggestions'] = $this->feedManager->getSuggestions();
+
+        echo $this->twig->render('admin.twig', $context);
     }
 }
