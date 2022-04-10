@@ -22,7 +22,7 @@ class FeedManager
     public function __construct()
     {
         $this->db = new DataBase(
-            __DIR__ . '/../blogrng.sqlite',
+            __DIR__ . '/../data/blogrng.sqlite',
             __DIR__ . '/../db/'
         );
     }
