@@ -21,7 +21,7 @@
         </p>
 
         <p>
-            I love reading texts written by real people. Texts that don't want to sell something.
+            I love reading text written by real people. Texts that don't want to sell something.
             But how can you discover texts you can't search for because you don't know they exist?
         </p>
 
@@ -56,7 +56,7 @@
         <p>Here are the current statistics:</p>
 
         <ul>
-            <li><b>{{ stats.feeds }}</b> Websites with a feed</li>
+            <li><b>{{ stats.feeds }}</b> websites with a feed</li>
             <li><b>{{ stats.items }}</b> posts overall</li>
             <li><b>{{ stats.recentitems }}</b> posts in the last six months</li>
             <li><b>{{ (stats.size / 1024 / 1024) |round(2) }} MiB</b> database size</li>
@@ -82,13 +82,13 @@
         <p>People abandon or sell their domains. Things break. Sites get hacked.</p>
 
         <p>
-            If you got sent to a broken site, please let me know at
+            If you were sent to a broken site, please let me know at
             <a href="mailto:andi@splitbrain.org">andi@splitbrain.org</a>. Be sure to include the ID shown under each
             visited link on the front page - it helps me to identify the broken URLs.
         </p>
 
         <p>
-            Please also let me know when you come across things that don't fit the spirit of personal webpages.
+            Please also let me know if you come across things that don't fit the spirit of personal webpages.
             Things like YouTube channels, corporate blogs, etc. should not be in the index but might have slipped
             through in the initial setup.
         </p>
@@ -105,10 +105,9 @@
                 on the start page, but they are sorted by some kind of popularity score.
             </li>
             <li>
-                <a href="https://search.marginalia.nu/explore/random">Marginalia</a>: another indieweb search engine.
+                <a href="https://search.marginalia.nu/explore/random">Marginalia</a>: another IndieWeb search engine.
                 This one has an option to visually browse random sites.
             </li>
-
         </ul>
     </details>
 
@@ -118,6 +117,7 @@
         <p>This is a very simple, custom PHP application standing on the shoulders of giants:</p>
         <ul>
             <li><a href="https://simplepie.org/">SimplePie</a> for RSS discovery and parsing</li>
+            <li><a href="https://github.com/flack/UniversalFeedCreator">UniversalFeedCreator</a> for RSS feed creation</li>
             <li><a href="https://www.sqlite.org/">SQLite</a> for data storage</li>
             <li><a href="https://twig.symfony.com/">Twig</a> for templating</li>
             <li><a href="https://simplecss.org/">SimpleCSS</a> for nice looks</li>
