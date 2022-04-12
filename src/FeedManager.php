@@ -130,6 +130,9 @@ class FeedManager
         $sql = 'SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()';
         $stats['size'] = $this->db->queryValue($sql);
 
+        $sql = 'SELECT COUNT(*) FROM suggestions';
+        $stats['suggestions'] = $this->db->queryValue($sql);
+
         return $stats;
     }
 
