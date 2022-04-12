@@ -1,0 +1,18 @@
+{% extends 'partials/layout.twig' %}
+
+{% block content %}
+    <h2>RSS Feeds</h2>
+
+    <p>
+        Use these feeds to get your daily or weekly dose of random blog posts, straight to your RSS reader.
+    </p>
+
+    <ul>
+        <li><a href="dailyfeed">Daily feed of 1 random post</a></li>
+        <li><a href="weeklyfeed">Weekly feed of 5 random posts</a></li>
+    </ul>
+
+    <p>
+        Hint: you can add a <code>?num=<i>X</i></code> parameter to get up to 25 posts instead of the defaults above.
+    </p>
+{% endblock %}

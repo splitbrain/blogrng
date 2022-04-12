@@ -22,6 +22,7 @@
     "splitbrain/php-cli": "^1.1",
     "psr/log": "^1.1",
     "ext-json": "*",
-    "twig/twig": "^2.12"
+    "twig/twig": "^2.12",
+    "openpsa/universalfeedcreator": "v1.8.4.1"
   }
 }

@@ -38,17 +38,24 @@ class FeedManager
     }
 
     /**
-     * Get a random entry, that is not part of the given exclude list
+     * Get random entries, that is not part of the given exclude list
      *
      * @param int[] $seenPostIDs
-     * @return array
+     * @param int $limit how many posts
+     * @return string[][]
      */
-    public function getRandom($seenPostIDs = [])
+    public function getRandoms($seenPostIDs = [], $limit = 1)
     {
         $seenPostIDs = array_map('intval', $seenPostIDs);
         $seenPostIDs = join(',', $seenPostIDs);
 
         $mindate = time() - self::MAXAGE;
+
+        if ($limit == 1) {
+            $fairness = "AND F.feedid IN (SELECT X.feedid FROM feeds X WHERE F.errors = 0 ORDER BY random() LIMIT 1)";
+        } else {
+            $fairness = '';
+        }
 
         $sql = "
             SELECT *
@@ -56,22 +63,16 @@ class FeedManager
             WHERE I.feedid = F.feedid
               AND I.itemid NOT IN ($seenPostIDs)
               AND I.published > $mindate
-              AND F.feedid IN (
-                  SELECT X.feedid 
-                    FROM feeds X
-                   WHERE F.errors = 0
-                ORDER BY random()
-                  LIMIT 1
-                  ) 
+                  $fairness               
          ORDER BY random()
-            LIMIT 1
+            LIMIT $limit
              ";
 
         $result = $this->db->queryAll($sql);
         // if we did not get results, try again without excluding posts
-        if (empty($result)) return $this->getRandom();
+        if (empty($result)) return $this->getRandoms([], $limit);
 
-        return $result[0];
+        return $result;
     }
 
     /**

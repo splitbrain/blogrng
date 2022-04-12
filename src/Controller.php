@@ -108,7 +108,7 @@ class Controller
 
     public function random()
     {
-        $post = $this->feedManager->getRandom($this->cookieManager->getSeenPostIDs());
+        $post = $this->feedManager->getRandoms($this->cookieManager->getSeenPostIDs())[0];
         $this->cookieManager->addSeenPostID($post['itemid']);
         header('Location: ' . $post['itemurl']);
     }
@@ -132,8 +132,7 @@ class Controller
         $context = [];
 
 
-
-        if(isset($_REQUEST['add'])) {
+        if (isset($_REQUEST['add'])) {
             try {
                 $context['feed'] = $this->feedManager->addFeed($_REQUEST['add']);
                 $this->feedManager->removeSuggestion($context['feed']['feedid']);
@@ -142,11 +141,11 @@ class Controller
             }
         }
 
-        if(isset($_REQUEST['remove'])) {
+        if (isset($_REQUEST['remove'])) {
             $this->feedManager->removeSuggestion($_REQUEST['remove']);
         }
 
-        if(isset($_REQUEST['delete'])) {
+        if (isset($_REQUEST['delete'])) {
             try {
                 $this->feedManager->deleteFeed($_REQUEST['delete']);
             } catch (\Exception $e) {
@@ -157,5 +156,60 @@ class Controller
         $context['suggestions'] = $this->feedManager->getSuggestions();
 
         echo $this->twig->render('admin.twig', $context);
+    }
+
+    public function rss()
+    {
+        echo $this->twig->render('rss.twig');
+    }
+
+    public function dailyfeed()
+    {
+        $num = 1;
+        if (isset($_REQUEST['num'])) $num = (int)$_REQUEST['num'];
+        if ($num < 0) $num = 1;
+        if ($num > 25) $num = 25;
+        $this->feed(1, $num);
+    }
+
+    public function weeklyfeed()
+    {
+        $num = 5;
+        if (isset($_REQUEST['num'])) $num = (int)$_REQUEST['num'];
+        if ($num < 0) $num = 1;
+        if ($num > 25) $num = 25;
+        $this->feed(7, $num);
+    }
+
+    protected function feed($freq = 1, $num = 5)
+    {
+        $cache = __DIR__ . '/../data/rss/' . $freq . '.' . $num . '.xml';
+
+        if (@filemtime($cache) < time() - $freq * 60 * 60 * 24) {
+
+            $creator = new \UniversalFeedCreator();
+            $creator->title = 'indieblog.page daily random posts';
+            $creator->description = 'Discover the IndieWeb, one blog post at a time.';
+            $creator->link = 'https://indieblog.page';
+            $creator->syndicationURL = 'https://indieblog.page/rss/daily.xml';
+
+
+            $result = $this->feedManager->getRandoms([], $num);
+            foreach ($result as $data) {
+                $item = new \FeedItem();
+                $item->title = $data['itemtitle'];
+                $item->link = $data['itemurl'];
+                $item->date = (int)$data['published'];
+                $item->source = $data['feedurl'];
+                $item->author = $data['feedtitle'];
+                $item->description = $data['itemtitle'] . ' published at ' . $data['feedtitle'];
+
+                $creator->addItem($item);
+            }
+            $creator->saveFeed('RSS0.91', $cache, false);
+        }
+
+        header('Content-Type: application/rss+xml');
+        echo file_get_contents($cache);
     }
 }
