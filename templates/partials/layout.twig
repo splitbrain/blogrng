@@ -1,3 +1,5 @@
+{% set title = 'Discover the IndieWeb, one blog post at a time.' %}
+{% set description = 'A website to randomly explore the IndieWeb. Simply click a button and you will be redirected to a random post from a personal blog.' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,19 +8,18 @@
     <link rel="stylesheet" href="simple.min.css">
     <link rel="stylesheet" href="custom.css">
     <link rel="icon" href="dice.svg">
-    <title>Random Indie Weblog Posts</title>
-
+    <title>{{ title }}</title>
+    <meta name="description" content="{{ description }}">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Discover the IndieWeb, one blog post at a time.">
+    <meta property="og:title" content="{{ title }}">
     <meta property="og:url" content="https://indieblog.page">
     <meta property="og:image" content="https://indieblog.page/ograph.jpg">
-    <meta property="og:description"
-          content="A website to randomly explore the IndieWeb. Simply click a button and you will be redirected to a random post from a personal blog.">
+    <meta property="og:description" content="{{ description }}">
 </head>
 <body>
 <header>
     <h1>indieblog.page</h1>
-    <p>Discover the IndieWeb, one blog post at a time.</p>
+    <p>{{ title }}</p>
 
     {% include 'partials/navigation.twig' %}
 </header>
