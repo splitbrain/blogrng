@@ -54,14 +54,23 @@ class FeedManager
             SELECT *
              FROM items I, feeds F
             WHERE I.feedid = F.feedid
-              AND F.errors = 0
               AND I.itemid NOT IN ($seenPostIDs)
               AND I.published > $mindate
+              AND F.feedid IN (
+                  SELECT X.feedid 
+                    FROM feeds X
+                   WHERE F.errors = 0
+                ORDER BY random()
+                  LIMIT 1
+                  ) 
          ORDER BY random()
             LIMIT 1
              ";
 
         $result = $this->db->queryAll($sql);
+        // if we did not get results, try again without excluding posts
+        if (empty($result)) return $this->getRandom();
+
         return $result[0];
     }
 
