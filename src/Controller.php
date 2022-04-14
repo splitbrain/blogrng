@@ -191,22 +191,19 @@ class Controller
             $creator->title = 'indieblog.page daily random posts';
             $creator->description = 'Discover the IndieWeb, one blog post at a time.';
             $creator->link = 'https://indieblog.page';
-            $creator->syndicationURL = 'https://indieblog.page/rss/daily.xml';
-
 
             $result = $this->feedManager->getRandoms([], $num);
             foreach ($result as $data) {
                 $item = new \FeedItem();
-                $item->title = $data['itemtitle'];
+                $item->title = '🎲 ' . $data['itemtitle'];
                 $item->link = $data['itemurl'];
                 $item->date = (int)$data['published'];
                 $item->source = $data['feedurl'];
                 $item->author = $data['feedtitle'];
-                $item->description = $data['itemtitle'] . ' published at ' . $data['feedtitle'];
-
+                $item->description = $this->twig->render('partials/rssitem.twig', ['item' => $data]);
                 $creator->addItem($item);
             }
-            $creator->saveFeed('RSS0.91', $cache, false);
+            $creator->saveFeed('RSS2.0', $cache, false);
         }
 
         header('Content-Type: application/rss+xml');
