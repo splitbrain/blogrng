@@ -9,10 +9,16 @@
 
     <ul>
         <li><a href="dailyfeed">Daily feed of 1 random post</a></li>
-        <li><a href="weeklyfeed">Weekly feed of 5 random posts</a></li>
+        <li><a href="dailyfeed?num=3">Daily feed of 3 random posts</a></li>
+        <li><a href="dailyfeed?num=5">Daily feed of 5 random posts</a></li>
+        <li><a href="dailyfeed?num=10">Daily feed of 10 random posts</a></li>
     </ul>
 
-    <p>
-        Hint: you can add a <code>?num=<i>X</i></code> parameter to get up to 25 posts instead of the defaults above.
-    </p>
+    <ul>
+        <li><a href="weeklyfeed">Weekly feed of 5 random posts</a></li>
+        <li><a href="weeklyfeed?num=10">Weekly feed of 10 random posts</a></li>
+        <li><a href="weeklyfeed?num=15">Weekly feed of 15 random posts</a></li>
+        <li><a href="weeklyfeed?num=25">Weekly feed of 25 random posts</a></li>
+    </ul>
+
 {% endblock %}
