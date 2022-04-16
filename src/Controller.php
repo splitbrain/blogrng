@@ -185,6 +185,8 @@ class Controller
     {
         $cache = __DIR__ . '/../data/rss/' . $freq . '.' . $num . '.xml';
 
+        $now = time();
+
         if (@filemtime($cache) < time() - $freq * 60 * 60 * 24) {
 
             $creator = new \UniversalFeedCreator();
@@ -197,7 +199,7 @@ class Controller
                 $item = new \FeedItem();
                 $item->title = '🎲 ' . $data['itemtitle'];
                 $item->link = $data['itemurl'];
-                $item->date = (int)$data['published'];
+                $item->date = $now--; // separate each post by a second, first one being the newest
                 $item->source = $data['feedurl'];
                 $item->author = $data['feedtitle'];
                 $item->description = $this->twig->render('partials/rssitem.twig', ['item' => $data]);
