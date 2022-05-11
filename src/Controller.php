@@ -25,6 +25,10 @@ class Controller
     {
         $loader = new FilesystemLoader(__DIR__ . '/../templates');
         $this->twig = new Environment($loader);
+        $this->twig->addGlobal('cachebuster', max(
+            filemtime(__DIR__ . '/../public/custom.css'),
+            filemtime(__DIR__ . '/../public/script.js')
+        ));
 
         $this->feedManager = new FeedManager();
         $this->cookieManager = new CookieManager();
