@@ -8,7 +8,7 @@
     </p>
 
     <details>
-        <summary>Why does this site exist?</summary>
+        <summary id="why">Why does this site exist?</summary>
 
         <p>Because I wanted it.</p>
 
@@ -31,7 +31,7 @@
     </details>
 
     <details>
-        <summary>What are the sources?</summary>
+        <summary id="sources">What are the sources?</summary>
 
         <p>I initially seeded the database with personal websites from the following sources:</p>
 
@@ -51,7 +51,7 @@
     </details>
 
     <details>
-        <summary>How many blogs and posts are in the database?</summary>
+        <summary id="stats">How many blogs and posts are in the database?</summary>
 
         <p>Here are the current statistics:</p>
 
@@ -71,15 +71,15 @@
         <div class="postfreq">
             {% set maxposts = max(stats.weeklyposts) %}
             {% for week, posts in stats.weeklyposts %}
-                <div style="height: {{ (posts * 100 / maxposts) |round }}px" title="W{{week}}: {{posts}} posts">
-                    W{{week}}: {{posts}} posts
+                <div style="height: {{ (posts * 100 / maxposts) |round }}px" title="W{{ week }}: {{ posts }} posts">
+                    W{{ week }}: {{ posts }} posts
                 </div>
             {% endfor %}
         </div>
     </details>
 
     <details>
-        <summary>Can I have the data?</summary>
+        <summary id="data">Can I have the data?</summary>
 
         <p>Sure, you can download the list of blog URLs as JSON here:</p>
 
@@ -87,7 +87,7 @@
     </details>
 
     <details>
-        <summary>Broken Links, Spam, etc.</summary>
+        <summary id="report">Broken Links, Spam, etc.</summary>
 
         <p>People abandon or sell their domains. Things break. Sites get hacked.</p>
 
@@ -105,7 +105,7 @@
     </details>
 
     <details>
-        <summary>Are there any alternatives?</summary>
+        <summary id="alternatives">Are there any alternatives?</summary>
 
         <p>There are other attempts at making the indieweb discoverable.</p>
 
@@ -126,12 +126,13 @@
     </details>
 
     <details>
-        <summary>What tech does this run on?</summary>
+        <summary id="tech">What tech does this run on?</summary>
 
         <p>This is a very simple, custom PHP application standing on the shoulders of giants:</p>
         <ul>
             <li><a href="https://simplepie.org/">SimplePie</a> for RSS discovery and parsing</li>
-            <li><a href="https://github.com/flack/UniversalFeedCreator">UniversalFeedCreator</a> for RSS feed creation</li>
+            <li><a href="https://github.com/flack/UniversalFeedCreator">UniversalFeedCreator</a> for RSS feed creation
+            </li>
             <li><a href="https://www.sqlite.org/">SQLite</a> for data storage</li>
             <li><a href="https://twig.symfony.com/">Twig</a> for templating</li>
             <li><a href="https://simplecss.org/">SimpleCSS</a> for nice looks</li>
