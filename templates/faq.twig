@@ -65,8 +65,17 @@
 
         <p>
             Currently only recent posts (published within the last six months) are used when
-            picking a random post.
+            picking a random post. Below is a visualization of the number of recent posts per week.
         </p>
+
+        <div class="postfreq">
+            {% set maxposts = max(stats.weeklyposts) %}
+            {% for week, posts in stats.weeklyposts %}
+                <div style="height: {{ (posts * 100 / maxposts) |round }}px" title="W{{week}}: {{posts}} posts">
+                    W{{week}}: {{posts}} posts
+                </div>
+            {% endfor %}
+        </div>
     </details>
 
     <details>

@@ -13,3 +13,20 @@
     display: inline-block;
     animation: spin 1.5s ease-in-out infinite;
 }
+
+details .postfreq {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.25em;
+}
+
+details .postfreq > div {
+    background-color: var(--accent);
+    color: var(--accent-bg);
+    font-size: x-small;
+    overflow: hidden;
+    text-indent: -1000px;
+    min-width: 1em;
+    flex-grow: 1;
+
+}

@@ -133,6 +133,16 @@ class FeedManager
         $sql = 'SELECT COUNT(*) FROM suggestions';
         $stats['suggestions'] = $this->db->queryValue($sql);
 
+        $sql = "SELECT COUNT(*) as cnt,
+                       STRFTIME('%Y-%W', published, 'unixepoch') as week,
+                       STRFTIME('%W', published, 'unixepoch') as w
+                  FROM items
+                 WHERE published > $mindate
+                   AND DATE(published, 'unixepoch') < DATE('now')
+              GROUP BY week
+              ORDER BY week";
+        $stats['weeklyposts'] = array_column($this->db->queryAll($sql), 'cnt', 'w');
+
         return $stats;
     }
 
