@@ -114,7 +114,7 @@ class Controller
     {
         $post = $this->feedManager->getRandoms($this->cookieManager->getSeenPostIDs())[0];
         $this->cookieManager->addSeenPostID($post['itemid']);
-        header('Location: ' . $post['itemurl']);
+        header('Location: ' . $this->campaignURL($post['itemurl']));
     }
 
     public function seen()
@@ -200,6 +200,9 @@ class Controller
 
             $result = $this->feedManager->getRandoms([], $num);
             foreach ($result as $data) {
+                $data['itemurl'] = $this->campaignURL($data['itemurl'], 'rss');
+                $data['feedurl'] = $this->campaignURL($data['feedurl'], 'rss');
+
                 $item = new \FeedItem();
                 $item->title = '🎲 ' . $data['itemtitle'];
                 $item->link = $data['itemurl'];
@@ -214,5 +217,19 @@ class Controller
 
         header('Content-Type: application/rss+xml');
         echo file_get_contents($cache);
+    }
+
+    /**
+     * Add campaign info
+     *
+     * @param string $url
+     * @param string $type
+     * @return string
+     */
+    protected function campaignURL($url, $type = 'random')
+    {
+        $params = 'utm_source=indieblog.page&utm_medium=' . $type . '&utm_campaign=indieblog.page';
+        $url .= (parse_url($url, PHP_URL_QUERY) ? '&' : '?') . $params;
+        return $url;
     }
 }
