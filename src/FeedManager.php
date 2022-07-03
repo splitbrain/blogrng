@@ -263,6 +263,10 @@ class FeedManager
             'added' => time(),
         ];
 
+        if (empty($feed['feedtitle'])) {
+            $feed['feedtitle'] = parse_url($feed['homepage'], PHP_URL_HOST);
+        }
+
         $sql = "SELECT * FROM feeds WHERE feedid = ?";
         $result = $this->db->queryRecord($sql, [$fid]);
         if ($result) {
