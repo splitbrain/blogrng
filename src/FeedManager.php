@@ -38,6 +38,51 @@ class FeedManager
     }
 
     /**
+     * Get a single random post
+     *
+     * This tries to be fair by giving each feed the same chance to be picked, regardless of
+     * post frequency
+     *
+     * @param int $seenPostIDs
+     * @return array
+     */
+    public function getRandom($seenPostIDs = [])
+    {
+        $seenPostIDs = array_map('intval', $seenPostIDs);
+        $seenPostIDs = join(',', $seenPostIDs);
+        $mindate = time() - self::MAXAGE;
+
+        // select a single distinct feed that has recent, unseen posts first
+        $sql = "
+            SELECT DISTINCT F.feedid
+             FROM items I, feeds F
+            WHERE I.feedid = F.feedid
+              AND I.itemid NOT IN ($seenPostIDs)
+              AND I.published > $mindate
+         ORDER BY random()
+            LIMIT 1
+             ";
+        $feedId = $this->db->queryValue($sql);
+
+        $sql = "
+            SELECT *
+             FROM items I, feeds F
+            WHERE I.feedid = F.feedid
+              AND I.itemid NOT IN ($seenPostIDs)
+              AND I.published > $mindate
+              AND F.feedid = :feedid
+         ORDER BY random()
+            LIMIT 1
+        ";
+
+        $result = $this->db->queryRecord($sql, [':feedid' => $feedId]);
+        // if we did not get results, try again without excluding posts
+        if (empty($result)) return $this->getRandom([]);
+
+        return $result;
+    }
+
+    /**
      * Get random entries, that is not part of the given exclude list
      *
      * @param int[] $seenPostIDs
@@ -46,33 +91,14 @@ class FeedManager
      */
     public function getRandoms($seenPostIDs = [], $limit = 1)
     {
-        $seenPostIDs = array_map('intval', $seenPostIDs);
-        $seenPostIDs = join(',', $seenPostIDs);
-
-        $mindate = time() - self::MAXAGE;
-
-        if ($limit == 1) {
-            $fairness = "AND F.feedid IN (SELECT X.feedid FROM feeds X WHERE X.errors = 0 ORDER BY random() LIMIT 1)";
-        } else {
-            $fairness = '';
+        $posts = [];
+        for ($i = 0; $i < $limit; $i++) {
+            $post = $this->getRandom($seenPostIDs);
+            $seenPostIDs[] = $post['itemid'];
+            $posts[] = $post;
         }
 
-        $sql = "
-            SELECT *
-             FROM items I, feeds F
-            WHERE I.feedid = F.feedid
-              AND I.itemid NOT IN ($seenPostIDs)
-              AND I.published > $mindate
-                  $fairness               
-         ORDER BY random()
-            LIMIT $limit
-             ";
-
-        $result = $this->db->queryAll($sql);
-        // if we did not get results, try again without excluding posts
-        if (empty($result)) return $this->getRandoms([], $limit);
-
-        return $result;
+        return $posts;
     }
 
     /**
