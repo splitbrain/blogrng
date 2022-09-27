@@ -52,7 +52,7 @@ class FeedManager
         $mindate = time() - self::MAXAGE;
 
         if ($limit == 1) {
-            $fairness = "AND F.feedid IN (SELECT X.feedid FROM feeds X WHERE F.errors = 0 ORDER BY random() LIMIT 1)";
+            $fairness = "AND F.feedid IN (SELECT X.feedid FROM feeds X WHERE X.errors = 0 ORDER BY random() LIMIT 1)";
         } else {
             $fairness = '';
         }
