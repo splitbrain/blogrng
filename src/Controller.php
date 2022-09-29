@@ -4,6 +4,7 @@ namespace splitbrain\blogrng;
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use Wa72\Url\Url;
 
 /**
  * A simple view controller
@@ -228,8 +229,10 @@ class Controller
      */
     protected function campaignURL($url, $type = 'random')
     {
-        $params = 'utm_source=indieblog.page&utm_medium=' . $type . '&utm_campaign=indieblog.page';
-        $url .= (parse_url($url, PHP_URL_QUERY) ? '&' : '?') . $params;
-        return $url;
+        $url = new Url($url);
+        $url->setQueryParameter('utm_source', 'indieblog.page');
+        $url->setQueryParameter('utm_medium', $type);
+        $url->setQueryParameter('utm_campaign', 'indieblog.page');
+        return $url->write();
     }
 }

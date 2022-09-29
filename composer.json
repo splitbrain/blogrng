@@ -23,6 +23,7 @@
     "psr/log": "^1.1",
     "ext-json": "*",
     "twig/twig": "^2.12",
-    "openpsa/universalfeedcreator": "v1.8.4.1"
+    "openpsa/universalfeedcreator": "v1.8.4.1",
+    "wa72/url": "^0.7.1"
   }
 }
