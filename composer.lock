@@ -113,16 +113,16 @@
         },
         {
             "name": "simplepie/simplepie",
-            "version": "1.5.8",
+            "version": "1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/simplepie/simplepie.git",
-                "reference": "d1d80f37264c9f1ed7fa3434eca14d179cb689b1"
+                "reference": "2bdbc51ed1010941c9c5f2cddca433e79665bfe1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/simplepie/simplepie/zipball/d1d80f37264c9f1ed7fa3434eca14d179cb689b1",
-                "reference": "d1d80f37264c9f1ed7fa3434eca14d179cb689b1",
+                "url": "https://api.github.com/repos/simplepie/simplepie/zipball/2bdbc51ed1010941c9c5f2cddca433e79665bfe1",
+                "reference": "2bdbc51ed1010941c9c5f2cddca433e79665bfe1",
                 "shasum": ""
             },
             "require": {
@@ -145,6 +145,9 @@
             "autoload": {
                 "psr-0": {
                     "SimplePie": "library"
+                },
+                "psr-4": {
+                    "SimplePie\\": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -178,22 +181,22 @@
             ],
             "support": {
                 "issues": "https://github.com/simplepie/simplepie/issues",
-                "source": "https://github.com/simplepie/simplepie/tree/1.5.8"
+                "source": "https://github.com/simplepie/simplepie/tree/1.6.0"
             },
-            "time": "2021-12-24T02:53:50+00:00"
+            "time": "2022-04-21T11:05:19+00:00"
         },
         {
             "name": "splitbrain/php-cli",
-            "version": "1.1.8",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/splitbrain/php-cli.git",
-                "reference": "8c2c001b1b55d194402cf18aad2757049ac6d575"
+                "reference": "e7d5dad2be4641c8719b34f7e0c350f70a80fda4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/splitbrain/php-cli/zipball/8c2c001b1b55d194402cf18aad2757049ac6d575",
-                "reference": "8c2c001b1b55d194402cf18aad2757049ac6d575",
+                "url": "https://api.github.com/repos/splitbrain/php-cli/zipball/e7d5dad2be4641c8719b34f7e0c350f70a80fda4",
+                "reference": "e7d5dad2be4641c8719b34f7e0c350f70a80fda4",
                 "shasum": ""
             },
             "require": {
@@ -233,9 +236,9 @@
             ],
             "support": {
                 "issues": "https://github.com/splitbrain/php-cli/issues",
-                "source": "https://github.com/splitbrain/php-cli/tree/1.1.8"
+                "source": "https://github.com/splitbrain/php-cli/tree/1.2.0"
             },
-            "time": "2021-02-05T12:02:46+00:00"
+            "time": "2022-07-06T19:04:58+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
