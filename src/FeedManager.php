@@ -4,7 +4,7 @@ namespace splitbrain\blogrng;
 
 use Exception;
 use PDOException;
-use SimplePie;
+use SimplePie\SimplePie;
 
 /**
  * Access and manage the feed database
@@ -104,8 +104,8 @@ class FeedManager
     /**
      * getInfo about the last seen pages, based on passed IDs
      *
-     * @param int[] $seenIDs
-     * @return array|false
+     * @param int[] $seenPostIDs
+     * @return array
      */
     public function getLastSeen($seenPostIDs)
     {
@@ -398,7 +398,7 @@ class FeedManager
     public function deleteFeed($feedID)
     {
         $feed = $this->getFeed($feedID);
-        if (!$feed) throw new \Exception('Feed does not exist');
+        if (!$feed) throw new Exception('Feed does not exist');
 
         $this->db->pdo()->exec('PRAGMA foreign_keys = ON');
         $sql = "DELETE FROM feeds WHERE feedid = ?";
