@@ -22,13 +22,17 @@ class CLI extends PSR3CLI
         $options->registerCommand('add', 'Adds a feed');
         $options->registerArgument('feedurl', 'The URL to the RSS/Atom feed', true, 'add');
 
-        $options->registerCommand('update', 'Get the newest items for all feeds');
+        $options->registerCommand('update',
+            'Get the newest items for all feeds and update auto suggestions');
 
         $options->registerCommand('inspect', 'Inspect the given feed or item');
         $options->registerArgument('id', 'Feed or item id', true, 'inspect');
 
         $options->registerCommand('delete', 'Delete the given feed');
         $options->registerArgument('id', 'Feed id', true, 'delete');
+
+        $options->registerCommand('addSource', 'Add a feed as auto suggestion source');
+        $options->registerArgument('sourceurl', 'The URL to the RSS/Atom feed', true, 'addSource');
 
         $options->registerCommand('adminpass', 'Set the password for the web admin user');
         $options->registerArgument('pass', 'The password to set', true, 'adminpass');
@@ -54,6 +58,8 @@ class CLI extends PSR3CLI
             case 'adminpass':
                 $this->feedManager->db()->setOpt('adminpass', password_hash($args[0], PASSWORD_DEFAULT));
                 return 0;
+            case 'addSource':
+                return $this->addSource($args[0]);
             default:
                 echo $options->help();
                 return 0;
@@ -80,12 +86,49 @@ class CLI extends PSR3CLI
     }
 
     /**
-     * Update all the feeds
+     * Add a new source
+     *
+     * @param string $sourceurl
+     * @return int
+     */
+    protected function addSource($sourceurl)
+    {
+        try {
+            $source = $this->feedManager->addSource($sourceurl);
+            $this->success('[{sourceid}] {sourceurl}', $source);
+            return 0;
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+            $this->debug($e->getTraceAsString());
+            return 1;
+        }
+    }
+
+    /**
+     * Update all the feeds and sources
      *
      * @return int
      */
     protected function updateFeeds()
     {
+        $sources = $this->feedManager->getSources();
+        foreach ($sources as $source) {
+            $this->info('Fetching suggestions from {source}', ['source' => $source['sourceurl']]);
+            try {
+                $count = $this->feedManager->fetchSource($source);
+                $this->success(
+                    'Found {count} new suggestions at {source}',
+                    ['count' => $count, 'source' => $source['sourceurl']]
+                );
+            } catch (Exception $e) {
+                $this->error(
+                    'Error fetching suggestions from {source}: {msg}',
+                    ['source' => $source['sourceurl'], 'msg' => $e->getMessage()]
+                );
+                $this->debug($e->getTraceAsString());
+            }
+        }
+
         $feeds = $this->feedManager->getAllUpdatableFeeds();
         foreach ($feeds as $feed) {
             try {

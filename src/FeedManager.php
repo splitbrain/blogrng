@@ -420,4 +420,94 @@ class FeedManager
         return md5($url);
     }
 
+    /**
+     * Add a RSS feed source for automatic suggestions
+     *
+     * @param string $url
+     * @return array
+     * @throws Exception
+     */
+    public function addSource($url)
+    {
+        $simplePie = new SimplePie();
+        $simplePie->cache = false;
+        $simplePie->set_feed_url($url);
+        if (!$simplePie->init()) {
+            throw new Exception($simplePie->error());
+        }
+        $url = $simplePie->feed_url;
+
+        $sid = $this->feedID($url);
+        $source = [
+            'sourceid' => $sid,
+            'sourceurl' => $url,
+            'added' => time(),
+        ];
+
+        $sql = "SELECT * FROM sources WHERE sourceid = ?";
+        $result = $this->db->queryRecord($sql, [$sid]);
+        if ($result) {
+            throw new Exception("[$sid] Source already exists");
+        }
+
+        $this->db->saveRecord('sources', $source);
+        return $source;
+    }
+
+    /**
+     * Get all sources
+     *
+     * @return array
+     */
+    public function getSources() {
+        $sql = "SELECT * FROM sources ORDER BY sourceurl";
+        return $this->db->queryAll($sql);
+    }
+
+    /**
+     * Fetch a single source and add new suggestions
+     *
+     * @param array $source A source record
+     * @return int number of added suggestions
+     * @throws Exception
+     */
+    public function fetchSource($source)
+    {
+        $simplePie = new SimplePie();
+        $simplePie->cache = false;
+        $simplePie->set_feed_url($source['sourceurl']);
+        $simplePie->force_feed(true); // no autodetect here
+
+        if (!$simplePie->init()) {
+            throw new Exception($simplePie->error());
+        }
+
+        $items = $simplePie->get_items();
+        if (!$items) throw new Exception('no items found');
+
+        $new = 0;
+        foreach ($items as $item) {
+            // check if we've seen this item already
+            $itemUrl = $item->get_permalink();
+            $hash = $this->feedID($itemUrl);
+            $sql = "SELECT seen FROM seen WHERE seen = ?";
+            $seen = $this->db->queryValue($sql, [$hash]);
+            if ($seen) continue;
+
+            // remember the item to not suggest it again
+            // we also remember it when it fails to add in the next step to not retry fails
+            $sql = "INSERT INTO seen (seen) VALUES (?)";
+            $this->db->queryValue($sql, [$hash]);
+
+            // add the suggestion
+            try {
+                $this->suggestFeed($itemUrl);
+                $new++;
+            } catch (Exception $e) {
+                // ignore
+            }
+        }
+
+        return $new;
+    }
 }
