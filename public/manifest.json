@@ -1,0 +1,32 @@
+{
+  "short_name": "IndieBlog",
+  "name": "indieblog.page",
+  "description": "Discover the IndieWeb, one blog post at a time.",
+  "icons": [
+    {
+      "src": "dice-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "dice-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "theme_color": "#0d47a1",
+
+  "share_target":
+  {
+    "action": "/suggest",
+    "method": "POST",
+    "enctype": "application/x-www-form-urlencoded",
+    "params":
+    {
+      "url": "suggest"
+    }
+  }
+}
