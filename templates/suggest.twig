@@ -9,14 +9,15 @@
 
 
     <form action="suggest" method="post">
+
+        {% include 'partials/feedback.twig' %}
+
         <p style="text-align: center">
             <label for="suggesturl">Suggest a feed or blog URL:</label><br>
             <input id="suggesturl" type="text" name="suggest" placeholder="https://example.com/feed.xml"><br>
             <input type="text" name="title" placeholder="this is just a honeypot" style="display: none">
             <button type="submit">Submit</button>
         </p>
-
-        {% include 'partials/feedback.twig' %}
     </form>
 
 
