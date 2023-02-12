@@ -97,9 +97,10 @@ class Controller
     {
         $context = [];
 
-        // Android share posts the URL in the text field for some reason
-        if (!isset($_POST['suggest']) && isset($_POST['text']) && preg_match('/^https?:\/\//', $_POST['text'])) {
-            $_POST['suggest'] = $_POST['text'];
+        // Android share often posts the URL in the text field for some reason
+        if (!isset($_POST['suggest']) && isset($_POST['text']) &&
+            preg_match('#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#i', $_POST['text'], $m)) {
+            $_POST['suggest'] = $m[0];
         }
 
         if (isset($_POST['suggest']) &&
