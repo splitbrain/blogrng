@@ -288,6 +288,7 @@ class FeedManager
             'feedid' => $fid,
             'feedurl' => $url,
             'homepage' => $simplePie->get_permalink(),
+            'mastodon' => (new Mastodon())->getProfile($simplePie->get_permalink()),
             'feedtitle' => $simplePie->get_title(),
             'added' => time(),
         ];
