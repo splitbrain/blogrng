@@ -34,8 +34,13 @@ class CLI extends PSR3CLI
         $options->registerCommand('addSource', 'Add a feed as auto suggestion source');
         $options->registerArgument('sourceurl', 'The URL to the RSS/Atom feed', true, 'addSource');
 
-        $options->registerCommand('adminpass', 'Set the password for the web admin user');
-        $options->registerArgument('pass', 'The password to set', true, 'adminpass');
+        $options->registerCommand('findProfiles', 'Find Mastodon profiles associated with the feeds');
+
+        $options->registerCommand('postRandom', 'Post a random item to Mastodon');
+
+        $options->registerCommand('config', 'Set a configuration value');
+        $options->registerArgument('key', 'The config key (adminpass|token|instance)', true, 'config');
+        $options->registerArgument('value', 'The value to set', true, 'config');
     }
 
     /** @inheritdoc */
@@ -55,11 +60,14 @@ class CLI extends PSR3CLI
                 return $this->inspect($args[0]);
             case 'delete':
                 return $this->delete($args[0]);
-            case 'adminpass':
-                $this->feedManager->db()->setOpt('adminpass', password_hash($args[0], PASSWORD_DEFAULT));
-                return 0;
+            case 'config':
+                return $this->config($args[0], $args[1]);
             case 'addSource':
                 return $this->addSource($args[0]);
+            case 'findProfiles';
+                return $this->updateMastodonProfiles();
+            case 'postRandom';
+                return $this->postRandom();
             default:
                 echo $options->help();
                 return 0;
@@ -188,6 +196,85 @@ class CLI extends PSR3CLI
             $this->debug($e->getTraceAsString());
             return 1;
         }
+    }
 
+    /**
+     * Set a config option
+     *
+     * @param string $key
+     * @param string $value
+     * @return int
+     */
+    public function config($key, $value)
+    {
+        $allowed = ['adminpass', 'token', 'instance'];
+        if(!in_array($key, $allowed)) {
+            $this->error('Invalid config key');
+            return 1;
+        }
+
+        if($key === 'adminpass') {
+            $value = password_hash($value, PASSWORD_DEFAULT);
+        }
+        
+        $this->feedManager->db()->setOpt($key, $value);
+        return 0;
+
+    }
+
+    /**
+     * Find Mastodon profiles associated with the feeds
+     *
+     * @return int
+     */
+    protected function updateMastodonProfiles()
+    {
+        $feeds = $this->feedManager->getAllFeeds();
+
+        foreach ($feeds as $feed) {
+            $mastodon = new Mastodon();
+            $profile = $mastodon->getProfile($feed['homepage']);
+
+            if ($profile !== $feed['mastodon']) {
+                $feed['mastodon'] = $profile;
+                $this->feedManager->db()->saveRecord('feeds', $feed);
+            }
+
+            if ($profile) {
+                $this->success('Found profile {profile} for {hp}', ['profile' => $profile, 'hp' => $feed['homepage']]);
+            } else {
+                $this->error('Could not find profile for {hp}', ['hp' => $feed['homepage']]);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Post a random item to Mastodon
+     *
+     * @return int
+     */
+    public function postRandom()
+    {
+        $token = $this->feedManager->db()->getOpt('token');
+        $instance = $this->feedManager->db()->getOpt('instance');
+
+        if (!$token || !$instance) {
+            $this->error('No Mastodon token or instance configured');
+            return 1;
+        }
+
+        $post = $this->feedManager->getRandom();
+
+        $mastodon = new Mastodon();
+        $result = $mastodon->postItem($post, $instance, $token);
+
+        if(isset($result['url'])) {
+            $this->success('Posted {url}', ['url' => $result['url']]);
+            return 0;
+        } else {
+            $this->error('Error posting: {error}', ['error' => $result['error']]);
+            return 1;
+        }
     }
 }

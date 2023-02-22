@@ -59,6 +59,7 @@
 
         <ul>
             <li><b>{{ stats.feeds }}</b> websites with a feed</li>
+            <li><b>{{ stats.mastodon }}</b> websites with a verified Mastodon account</li>
             <li><b>{{ stats.items }}</b> posts overall</li>
             <li><b>{{ stats.recentitems }}</b> posts in the last six months</li>
             <li><b>{{ (stats.size / 1024 / 1024) |round(2) }} MiB</b> database size</li>
@@ -124,6 +125,10 @@
                 <a href="https://blogdb.org/">BlogDB</a>: a small selection of blogs, but not necessarily personal ones.
                 It has a random blog mechanism.
             </li>
+            <li>
+                <a href="https://ooh.directory/">ooh.directory</a>: a <i>Yahoo!</i> style directory of blogs categorized
+                by topic. It has a random blog mechanism.
+            </li>
         </ul>
     </details>
 
@@ -138,6 +143,7 @@
             <li><a href="https://www.sqlite.org/">SQLite</a> for data storage</li>
             <li><a href="https://twig.symfony.com/">Twig</a> for templating</li>
             <li><a href="https://simplecss.org/">SimpleCSS</a> for nice looks</li>
+            <li><a href="https://github.com/scotteh/php-dom-wrapper">PHP-DOM-Wrapper</a> for finding Mastodon profiles</li>
         </ul>
         <p>
             The rest is just glue code. You can see it all on

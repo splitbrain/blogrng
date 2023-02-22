@@ -1,0 +1,1 @@
+ALTER TABLE `feeds` ADD `mastodon` VARCHAR( 255 ) NOT NULL DEFAULT '';

@@ -143,6 +143,9 @@ class FeedManager
         $sql = "SELECT COUNT(*) FROM feeds WHERE errors = 0";
         $stats['feeds'] = $this->db->queryValue($sql);
 
+        $sql = "SELECT COUNT(*) FROM feeds WHERE errors = 0 AND mastodon != ''";
+        $stats['mastodon'] = $this->db->queryValue($sql);
+
 
         $sql = "SELECT COUNT(*) FROM items A, feeds B
             WHERE A.feedid = B.feedid AND B.errors = 0";
