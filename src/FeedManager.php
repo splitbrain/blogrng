@@ -208,7 +208,7 @@ class FeedManager
     public function suggestFeed($url)
     {
         $simplePie = new SimplePie();
-        $simplePie->cache = false;
+        $simplePie->enable_cache(false);
         $simplePie->set_feed_url($url);
         if (!$simplePie->init()) {
             throw new Exception("Sorry I couldn't find a supported feed at that URL");
@@ -273,7 +273,7 @@ class FeedManager
     public function addFeed($url)
     {
         $simplePie = new SimplePie();
-        $simplePie->cache = false;
+        $simplePie->enable_cache(false);
         $simplePie->set_feed_url($url);
         if (!$simplePie->init()) {
             throw new Exception($simplePie->error());
@@ -334,7 +334,7 @@ class FeedManager
     public function fetchFeedItems($feed)
     {
         $simplePie = new SimplePie();
-        $simplePie->cache = false;
+        $simplePie->enable_cache(false);
         $simplePie->set_feed_url($feed['feedurl']);
         $simplePie->force_feed(true); // no autodetect here
 
@@ -430,7 +430,7 @@ class FeedManager
     public function addSource($url)
     {
         $simplePie = new SimplePie();
-        $simplePie->cache = false;
+        $simplePie->enable_cache(false);
         $simplePie->set_feed_url($url);
         if (!$simplePie->init()) {
             throw new Exception($simplePie->error());
@@ -474,7 +474,7 @@ class FeedManager
     public function fetchSource($source)
     {
         $simplePie = new SimplePie();
-        $simplePie->cache = false;
+        $simplePie->enable_cache(false);
         $simplePie->set_feed_url($source['sourceurl']);
         $simplePie->force_feed(true); // no autodetect here
 
