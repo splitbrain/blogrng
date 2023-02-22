@@ -20,6 +20,10 @@ class Mastodon
     {
         $html = $this->httpget($homepage);
 
+        // simplify homepage url
+        $homepage = new Url($homepage);
+        $homepage = $homepage->getHost() . rtrim($homepage->getPath(), '/');
+
         $dom = new Document();
         $dom->html($html);
         $links = $dom->find('a[rel=me]');
@@ -30,7 +34,7 @@ class Mastodon
             $data = json_decode($json, true);
 
             if ($data && isset($data['attachment'])) foreach ($data['attachment'] as $attachment) {
-                if ($attachment['type'] === 'PropertyValue' && (strpos($attachment['value'], $homepage) !== false)) {
+                if ($attachment['type'] === 'PropertyValue' && (stripos($attachment['value'], $homepage) !== false)) {
                     $server = new Url($data['url']);
                     return trim($server->getPath(),'/') . '@' . $server->getHost();
                 }
