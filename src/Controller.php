@@ -178,52 +178,18 @@ class Controller
     {
         $num = 1;
         if (isset($_REQUEST['num'])) $num = (int)$_REQUEST['num'];
-        if ($num < 0) $num = 1;
-        if ($num > 25) $num = 25;
-        $this->feed(1, $num);
+        $rss = new RSS();
+        header('Content-Type: application/rss+xml');
+        echo $rss->getFeed(1, $num);
     }
 
     public function weeklyfeed()
     {
         $num = 5;
         if (isset($_REQUEST['num'])) $num = (int)$_REQUEST['num'];
-        if ($num < 0) $num = 1;
-        if ($num > 25) $num = 25;
-        $this->feed(7, $num);
-    }
-
-    protected function feed($freq = 1, $num = 5)
-    {
-        $cache = __DIR__ . '/../data/rss/' . $freq . '.' . $num . '.xml';
-
-        $now = time();
-
-        if (@filemtime($cache) < time() - $freq * 60 * 60 * 24) {
-
-            $creator = new \UniversalFeedCreator();
-            $creator->title = 'indieblog.page daily random posts';
-            $creator->description = 'Discover the IndieWeb, one blog post at a time.';
-            $creator->link = 'https://indieblog.page';
-
-            $result = $this->feedManager->getRandoms([], $num);
-            foreach ($result as $data) {
-                $data['itemurl'] = self::campaignURL($data['itemurl'], 'rss');
-                $data['feedurl'] = self::campaignURL($data['feedurl'], 'rss');
-
-                $item = new \FeedItem();
-                $item->title = '🎲 ' . $data['itemtitle'];
-                $item->link = $data['itemurl'];
-                $item->date = $now--; // separate each post by a second, first one being the newest
-                $item->source = $data['feedurl'];
-                $item->author = $data['feedtitle'];
-                $item->description = $this->twig->render('partials/rssitem.twig', ['item' => $data]);
-                $creator->addItem($item);
-            }
-            $creator->saveFeed('RSS2.0', $cache, false);
-        }
-
+        $rss = new RSS();
         header('Content-Type: application/rss+xml');
-        echo file_get_contents($cache);
+        echo $rss->getFeed(7, $num);
     }
 
     /**

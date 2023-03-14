@@ -41,6 +41,9 @@ class CLI extends PSR3CLI
         $options->registerCommand('config', 'Set a configuration value');
         $options->registerArgument('key', 'The config key (adminpass|token|instance)', true, 'config');
         $options->registerArgument('value', 'The value to set', true, 'config');
+
+        $options->registerCommand('rss', 'Generate the RSS feeds');
+        $options->registerOption('force', 'Force a refresh of the feed', 'f', false, 'rss');
     }
 
     /** @inheritdoc */
@@ -68,10 +71,25 @@ class CLI extends PSR3CLI
                 return $this->updateMastodonProfiles();
             case 'postRandom';
                 return $this->postRandom();
+            case 'rss';
+                return $this->rss($options->getOpt('force', false));
             default:
                 echo $options->help();
                 return 0;
         }
+    }
+
+    /**
+     * Create all the feeds
+     * 
+     * @return int
+     */
+    protected function rss($force)
+    {
+        $rss = new RSS();
+        if($force) $rss->forceRefresh();
+        $rss->createAllFeeds($this);
+        return 0;
     }
 
     /**

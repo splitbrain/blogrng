@@ -26,6 +26,7 @@
     "openpsa/universalfeedcreator": "v1.8.4.1",
     "wa72/url": "^0.7.1",
     "ext-curl": "*",
-    "scotteh/php-dom-wrapper": "^2.0"
+    "scotteh/php-dom-wrapper": "^2.0",
+    "scotteh/php-goose": "^1.1"
   }
 }
