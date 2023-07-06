@@ -278,7 +278,14 @@ class FeedManager
         $simplePie = new SimplePie();
         $simplePie->enable_cache(false);
         $simplePie->set_feed_url($url);
-        if (!$simplePie->init()) {
+
+        try {
+            $ok = $simplePie->init();
+        } catch (\Throwable $e) {
+            throw new Exception('SimplePie error '.$e->getMessage());
+        }
+
+        if (!$ok) {
             throw new Exception($simplePie->error());
         }
 
