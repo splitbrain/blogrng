@@ -409,6 +409,7 @@ class FeedManager
                 if (!$itemTitle) continue;
                 $itemDate = $item->get_gmdate('U');
                 if (!$itemDate) $itemDate = time();
+                if ($itemDate > time()) $itemDate = time();
 
                 $record = [
                     'feedid' => $feed['feedid'],
