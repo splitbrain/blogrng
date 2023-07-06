@@ -34,6 +34,9 @@ class CLI extends PSR3CLI
         $options->registerCommand('addSource', 'Add a feed as auto suggestion source');
         $options->registerArgument('sourceurl', 'The URL to the RSS/Atom feed', true, 'addSource');
 
+        $options->registerCommand('addHN', 'Add links found in a hackernews post');
+        $options->registerArgument('id', 'The ID of the post', true, 'addHN');
+
         $options->registerCommand('findProfiles', 'Find Mastodon profiles associated with the feeds');
 
         $options->registerCommand('postRandom', 'Post a random item to Mastodon');
@@ -67,6 +70,8 @@ class CLI extends PSR3CLI
                 return $this->config($args[0], $args[1]);
             case 'addSource':
                 return $this->addSource($args[0]);
+            case 'addHN':
+                return $this->processHackerNewsItem((int)$args[0]);
             case 'findProfiles';
                 return $this->updateMastodonProfiles();
             case 'postRandom';
@@ -81,13 +86,13 @@ class CLI extends PSR3CLI
 
     /**
      * Create all the feeds
-     * 
+     *
      * @return int
      */
     protected function rss($force)
     {
         $rss = new RSS();
-        if($force) $rss->forceRefresh();
+        if ($force) $rss->forceRefresh();
         $rss->createAllFeeds($this);
         return 0;
     }
@@ -226,15 +231,15 @@ class CLI extends PSR3CLI
     public function config($key, $value)
     {
         $allowed = ['adminpass', 'token', 'instance'];
-        if(!in_array($key, $allowed)) {
+        if (!in_array($key, $allowed)) {
             $this->error('Invalid config key');
             return 1;
         }
 
-        if($key === 'adminpass') {
+        if ($key === 'adminpass') {
             $value = password_hash($value, PASSWORD_DEFAULT);
         }
-        
+
         $this->feedManager->db()->setOpt($key, $value);
         return 0;
 
@@ -287,7 +292,7 @@ class CLI extends PSR3CLI
         $mastodon = new Mastodon();
         $result = $mastodon->postItem($post, $instance, $token);
 
-        if(isset($result['url'])) {
+        if (isset($result['url'])) {
             $this->success('Posted {url}', ['url' => $result['url']]);
             return 0;
         } else {
@@ -295,4 +300,65 @@ class CLI extends PSR3CLI
             return 1;
         }
     }
+
+    /**
+     * Extracts links from the given HTML and adds them to the database
+     *
+     * @param string $html
+     * @return void
+     */
+    protected function addLinksFromHTML($html)
+    {
+        $regex = '/href="(https?:\/\/[^"]+)/';
+        preg_match_all($regex, $html, $matches);
+
+        $first = '';
+        foreach ($matches[1] as $url) {
+            if (preg_match('/(ycombinator|hnsearch|hn\.algolia)/', $url)) continue;
+            if (preg_match('/(blogspot\.com|hnapp\.com|substack\.com|github\.|medium\.com)/', $url)) continue;
+            if (preg_match('/(tailscale\.dev|youtube\.com|wikipedia\.org|bearblog\.dev)/', $url)) continue;
+            if (preg_match('/(\.micro\.blog|sr\.ht|tumblr\.com|ng-tech\.icu)/', $url)) continue;
+
+            if (!$first) {
+                // remember the first link, that's usually the main blog url
+                $first = $url;
+            } else {
+                // if follow up links are just articles on the main site, skip them
+                if (strpos($url, $first) === 0) {
+                    continue;
+                }
+            }
+
+            try {
+                $feed = $this->feedManager->addFeed($url);
+                $this->success('{url} {feedid} added', ['url' => $url, 'feedid' => $feed['feedid']]);
+            } catch (Exception $e) {
+                $this->error($url.' '.$e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Recusively process the given Hacker News item and extract links from it
+     *
+     * @param int $id
+     * @return int
+     */
+    protected function processHackerNewsItem($id)
+    {
+        $this->info('Processing HN item {id}', ['id' => $id]);
+        $json = file_get_contents("https://hacker-news.firebaseio.com/v0/item/$id.json");
+        $item = json_decode($json, true);
+
+        if (isset($item['text'])) {
+            $this->addLinksFromHTML(html_entity_decode($item['text']));
+        }
+
+        if (isset($item['kids'])) foreach ($item['kids'] as $kid) {
+            $this->processHackerNewsItem($kid);
+        }
+
+        return 1;
+    }
+
 }
