@@ -43,7 +43,16 @@
                     title: "Last Post",
                     field: "itemurl",
                     formatter: "link",
-                    formatterParams: {labelField: "itemtitle"},
+                    formatterParams: {
+                        labelField: "itemtitle",
+                        url: (cell) => {
+                            const url = new URL(cell.getValue());
+                            url.searchParams.set('utm_source', 'indieblog.page');
+                            url.searchParams.set('utm_medium', 'list');
+                            url.searchParams.set('utm_campaign', 'indieblog.page');
+                            return url.toString();
+                        },
+                    },
                     width: 400,
                 },
                 {
@@ -67,6 +76,13 @@
                             const url = new URL(value);
                             if (url.pathname === '/') return url.hostname;
                             return url.hostname + url.pathname;
+                        },
+                        url: (cell) => {
+                            const url = new URL(cell.getValue());
+                            url.searchParams.set('utm_source', 'indieblog.page');
+                            url.searchParams.set('utm_medium', 'list');
+                            url.searchParams.set('utm_campaign', 'indieblog.page');
+                            return url.toString();
                         }
                     },
                 },
