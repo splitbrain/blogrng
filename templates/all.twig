@@ -1,0 +1,131 @@
+{% extends 'partials/layout.twig' %}
+
+{% block metahead %}
+    <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <h2>List of all Blogs</h2>
+
+    <p>
+        Here's a list of all available blogs with their most recent post. You can sort by clicking on the column
+        headers. You can also filter by typing in the input fields.
+    </p>
+
+    <div class="full-width">
+        <div id="table" style="height: 75vh">Sorry, this feature needs JavaScript</div>
+    </div>
+
+    <script type="text/javascript">
+        new Tabulator("#table", {
+            ajaxURL: 'export',
+            initialSort: [
+                {column: "published", dir: "desc"},
+            ],
+            initialHeaderFilter:[
+                {field:"errors", value:"0"},
+            ],
+            sortOrderReverse: true,
+            columnDefaults: {
+                headerFilterPlaceholder: "filter",
+                headerFilter: "input",
+                tooltip: true,
+                headerTooltip: true,
+            },
+            columns: [
+                {
+                    title: "Blog Title",
+                    field: "feedtitle",
+                    width: 300,
+                },
+                {
+                    title: "Last Post",
+                    field: "itemurl",
+                    formatter: "link",
+                    formatterParams: {labelField: "itemtitle"},
+                    width: 400,
+                },
+                {
+                    title: "Posted",
+                    field: "published",
+                    sorter: "number",
+                    width: 80,
+                    hozAlign: "right",
+                    formatter: (cell) => {
+                        return (new Date(cell.getValue() * 1000)).toISOString().split('T')[0];
+                    },
+                },
+                {
+                    title: "Homepage",
+                    field: "homepage",
+                    formatter: "link",
+                    formatterParams: {
+                        label: (cell) => {
+                            const value = cell.getValue();
+                            if (value === '') return '';
+                            const url = new URL(value);
+                            if (url.pathname === '/') return url.hostname;
+                            return url.hostname + url.pathname;
+                        }
+                    },
+                },
+                {
+                    title: "Added",
+                    field: "added",
+                    sorter: "number",
+                    width: 80,
+                    hozAlign: "right",
+                    formatter: (cell) => {
+                        return (new Date(cell.getValue() * 1000)).toISOString().split('T')[0];
+                    },
+                },
+                {
+                    title: "Feed",
+                    field: "feedurl",
+                    formatter: "link",
+                    width: 150,
+                    formatterParams: {
+                        label: (cell) => {
+                            return (new URL(cell.getValue())).pathname
+                        }
+                    },
+                },
+                {
+                    title: "Mastodon",
+                    field: "mastodon",
+                    formatter: "link",
+                    width: 150,
+                    formatterParams: {
+                        url: (cell) => {
+                            const value = cell.getValue();
+                            if (value === '') return '';
+                            const parts = value.split('@');
+                            return 'https://' + parts[2] + '/@' + parts[1];
+                        }
+                    },
+                },
+                {
+                    title: "ID",
+                    field: "feedid",
+                    hozAlign: "right",
+                },
+                {
+                    title: "Error Count",
+                    field: "errors",
+                    sorter: "number",
+                    width: 60,
+                    hozAlign: "right",
+                    headerFilter: "number",
+                },
+                {
+                    title: "Last Error",
+                    field: "lasterror",
+                },
+            ],
+        });
+    </script>
+
+
+    <p>All the above data is also available as <a href="export">JSON export</a>.</p>
+{% endblock %}

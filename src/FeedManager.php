@@ -282,7 +282,7 @@ class FeedManager
         try {
             $ok = $simplePie->init();
         } catch (\Throwable $e) {
-            throw new Exception('SimplePie error '.$e->getMessage());
+            throw new Exception('SimplePie error ' . $e->getMessage());
         }
 
         if (!$ok) {
@@ -335,6 +335,37 @@ class FeedManager
     {
         $query = "SELECT * FROM feeds WHERE errors = 0 ORDER BY feedurl";
         return $this->db->queryAll($query);
+    }
+
+    /**
+     * Get all feeds with their most recent post
+     *
+     * Important! You need to close the cursor when done with the statement
+     *
+     * @param bool $witherrors Include feeds that have errors?
+     * @return \PDOStatement
+     */
+    public function getAllFeedsWithDetails($witherrors = false)
+    {
+        $errorlimit = $witherrors ? 100 : 0;
+
+        $query = "SELECT *
+                    FROM feeds A
+              INNER JOIN (SELECT feedid,
+                                 itemid,
+                                 itemurl,
+                                 itemtitle,
+                                 MAX(published) AS published
+                            FROM items
+                        GROUP BY feedid
+                         ) B 
+                      ON A.feedid = B.feedid
+                   WHERE errors <= $errorlimit
+                ORDER BY A.feedurl";
+
+        $stmt = $this->db->pdo()->prepare($query);
+        $stmt->execute();
+        return $stmt;
     }
 
     /**
@@ -470,7 +501,8 @@ class FeedManager
      *
      * @return array
      */
-    public function getSources() {
+    public function getSources()
+    {
         $sql = "SELECT * FROM sources ORDER BY sourceurl";
         return $this->db->queryAll($sql);
     }

@@ -93,6 +93,11 @@ class Controller
         echo $this->twig->render('faq.twig', $context);
     }
 
+    public function all()
+    {
+        echo $this->twig->render('all.twig');
+    }
+
     public function suggest()
     {
         $context = [];
@@ -132,9 +137,18 @@ class Controller
 
     public function export()
     {
-        $all = $this->feedManager->getAllFeeds();
+        $stmt = $this->feedManager->getAllFeedsWithDetails(true);
+
         header('Content-Type: application/json');
-        echo json_encode($all);
+        echo "[\n";
+        $firstRowDone = false;
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            if ($firstRowDone) echo ",\n";
+            echo json_encode($row, JSON_PRETTY_PRINT);
+            $firstRowDone = true;
+        }
+        echo "]\n";
+        $stmt->closeCursor();
     }
 
     public function admin()

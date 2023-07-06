@@ -30,3 +30,21 @@ details .postfreq > div {
     flex-grow: 1;
 
 }
+
+.full-width {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    display: flex;
+    justify-content: center;
+    
+}
+
+.full-width > * {
+    max-width: 1500px;
+    flex: 100% 1 1;
+    margin: 1em;
+}
