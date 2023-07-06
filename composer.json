@@ -17,7 +17,7 @@
     }
   },
   "require": {
-    "simplepie/simplepie": "^1.5",
+    "simplepie/simplepie": "^1.8",
     "ext-pdo": "*",
     "splitbrain/php-cli": "^1.1",
     "psr/log": "^1.1",
