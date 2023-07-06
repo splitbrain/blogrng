@@ -24,6 +24,7 @@ class CLI extends PSR3CLI
 
         $options->registerCommand('update',
             'Get the newest items for all feeds and update auto suggestions');
+        $options->registerOption('skipsources', 'Skip updating auto suggestion sources', 's', false, 'update');
 
         $options->registerCommand('inspect', 'Inspect the given feed or item');
         $options->registerArgument('id', 'Feed or item id', true, 'inspect');
@@ -61,7 +62,7 @@ class CLI extends PSR3CLI
             case 'add':
                 return $this->addFeed($args[0]);
             case 'update':
-                return $this->updateFeeds();
+                return $this->updateFeeds($options->getOpt('skipsources', false));
             case 'inspect':
                 return $this->inspect($args[0]);
             case 'delete':
@@ -140,23 +141,25 @@ class CLI extends PSR3CLI
      *
      * @return int
      */
-    protected function updateFeeds()
+    protected function updateFeeds($skipSources = false)
     {
-        $sources = $this->feedManager->getSources();
-        foreach ($sources as $source) {
-            $this->info('Fetching suggestions from {source}', ['source' => $source['sourceurl']]);
-            try {
-                $count = $this->feedManager->fetchSource($source);
-                $this->success(
-                    'Found {count} new suggestions at {source}',
-                    ['count' => $count, 'source' => $source['sourceurl']]
-                );
-            } catch (Exception $e) {
-                $this->error(
-                    'Error fetching suggestions from {source}: {msg}',
-                    ['source' => $source['sourceurl'], 'msg' => $e->getMessage()]
-                );
-                $this->debug($e->getTraceAsString());
+        if (!$skipSources) {
+            $sources = $this->feedManager->getSources();
+            foreach ($sources as $source) {
+                $this->info('Fetching suggestions from {source}', ['source' => $source['sourceurl']]);
+                try {
+                    $count = $this->feedManager->fetchSource($source);
+                    $this->success(
+                        'Found {count} new suggestions at {source}',
+                        ['count' => $count, 'source' => $source['sourceurl']]
+                    );
+                } catch (Exception $e) {
+                    $this->error(
+                        'Error fetching suggestions from {source}: {msg}',
+                        ['source' => $source['sourceurl'], 'msg' => $e->getMessage()]
+                    );
+                    $this->debug($e->getTraceAsString());
+                }
             }
         }
 
