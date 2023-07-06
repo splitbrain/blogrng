@@ -109,6 +109,12 @@
                     title: "ID",
                     field: "feedid",
                     hozAlign: "right",
+                    formatter: "link",
+                    formatterParams: {
+                        url: (cell) => {
+                            return 'inspect?id=' + cell.getValue();
+                        }
+                    },
                 },
                 {
                     title: "Error Count",

@@ -1,0 +1,31 @@
+{% extends 'partials/layout.twig' %}
+
+{% block content %}
+    <h2>Inspect</h2>
+
+
+    {% if feed %}
+        <ul>
+            <li>Title: <strong>{{ feed.feedtitle }}</strong></li>
+            <li>Feed URL: <a href="{{ feed.feedurl }}">{{ feed.feedurl }}</a></li>
+            <li>Homepage: <a href="{{ feed.homepage }}">{{ feed.homepage }}</a></li>
+            <li>Errors: {{ feed.errors }}</li>
+            <li>Last Error: {{ feed.lasterror }}</li>
+            <li>Added: {{ feed.added|date }}</li>
+            <li>Last Fetch: {{ feed.fetched|date }}</li>
+        </ul>
+
+        <ul>
+            {% for item in items %}
+                <li><a href="{{ item.itemurl }}">{{ item.itemtitle }}</a><br />{{ item.published|date }}</li>
+            {% endfor %}
+        </ul>
+
+
+        <p><a href="admin?delete={{ feed.feedid }}" class="button">Remove</a></p>
+    {% else %}
+        <p>Feed not found</p>
+    {% endif %}
+
+
+{% endblock %}

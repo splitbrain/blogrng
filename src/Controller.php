@@ -156,7 +156,6 @@ class Controller
         $this->requireAuth();
         $context = [];
 
-
         if (isset($_REQUEST['add'])) {
             try {
                 $context['feed'] = $this->feedManager->addFeed($_REQUEST['add']);
@@ -181,6 +180,21 @@ class Controller
         $context['suggestions'] = $this->feedManager->getSuggestions();
 
         echo $this->twig->render('admin.twig', $context);
+    }
+
+    public function inspect()
+    {
+        $this->requireAuth();
+        $context = [];
+
+        if(isset($_REQUEST['id'])){
+            $id = substr($_REQUEST['id'], 0, 32);
+
+            $context['feed'] = $this->feedManager->getFeed($id);
+            $context['items'] = $this->feedManager->getFeedItems($id);
+        }
+
+        echo $this->twig->render('inspect.twig', $context);
     }
 
     public function rss()

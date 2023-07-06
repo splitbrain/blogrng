@@ -202,6 +202,19 @@ class FeedManager
     }
 
     /**
+     * Get the newest items for a feed
+     * 
+     * @param string $feedid
+     * @param int $max
+     * @return array|false
+     */
+    public function getFeedItems($feedid, $max=10) {
+        $sql = "SELECT * FROM items WHERE feedid = ? ORDER BY published DESC LIMIT ?";
+        $result = $this->db->queryAll($sql, [$feedid, $max]);
+        return $result;
+    }
+
+    /**
      * Suggest a new feed
      *
      * @param string $url
