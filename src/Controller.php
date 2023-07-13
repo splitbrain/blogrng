@@ -190,6 +190,13 @@ class Controller
         if(isset($_REQUEST['id'])){
             $id = substr($_REQUEST['id'], 0, 32);
 
+            if(!empty($_REQUEST['reset'])) {
+                try {
+                    $this->feedManager->resetFeedErrors($id);
+                } catch (\Exception $ignored) {
+                }
+            }
+
             $context['feed'] = $this->feedManager->getFeed($id);
             $context['items'] = $this->feedManager->getFeedItems($id);
         }

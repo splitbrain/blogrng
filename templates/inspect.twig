@@ -22,7 +22,10 @@
         </ul>
 
 
-        <p><a href="admin?delete={{ feed.feedid }}" class="button">Remove</a></p>
+        <p>
+            <a href="admin?delete={{ feed.feedid }}" class="button">Remove</a>
+            <a href="inspect?id={{ feed.feedid }}&reset=1" class="button">Reset Errors</a>
+        </p>
     {% else %}
         <p>Feed not found</p>
     {% endif %}

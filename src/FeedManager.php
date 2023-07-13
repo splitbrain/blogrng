@@ -463,6 +463,23 @@ class FeedManager
     }
 
     /**
+     * Reset the error counter for the given feed
+     *
+     * @param $feedID
+     * @return void
+     * @throws Exception
+     */
+    public function resetFeedErrors($feedID)
+    {
+        $feed = $this->getFeed($feedID);
+        if (!$feed) throw new Exception('Feed does not exist');
+
+        $feed['errors'] = 0;
+        $feed['lasterror'] = '';
+        $this->db->saveRecord('feeds', $feed);
+    }
+
+    /**
      * Create a ID for the given feed
      *
      * @param string $url
