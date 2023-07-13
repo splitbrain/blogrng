@@ -474,8 +474,8 @@ class FeedManager
         $feed = $this->getFeed($feedID);
         if (!$feed) throw new Exception('Feed does not exist');
 
-        $feed['errors'] = 0;
-        $feed['lasterror'] = '';
+        $feed['errors'] = 1;
+        $feed['lasterror'] = 'to be retried';
         $this->db->saveRecord('feeds', $feed);
     }
 
