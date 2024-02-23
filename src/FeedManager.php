@@ -203,12 +203,13 @@ class FeedManager
 
     /**
      * Get the newest items for a feed
-     * 
+     *
      * @param string $feedid
      * @param int $max
      * @return array|false
      */
-    public function getFeedItems($feedid, $max=10) {
+    public function getFeedItems($feedid, $max = 10)
+    {
         $sql = "SELECT * FROM items WHERE feedid = ? ORDER BY published DESC LIMIT ?";
         $result = $this->db->queryAll($sql, [$feedid, $max]);
         return $result;
@@ -506,15 +507,24 @@ class FeedManager
         $simplePie->enable_cache(false);
         $simplePie->set_feed_url($url);
         if (!$simplePie->init()) {
-            throw new Exception($simplePie->error());
+            $error = $simplePie->error();
+            if ($simplePie->status_code() == 200 && strpos($error, 'text/plain') !== false) {
+                $type = 'list';
+            } else {
+                throw new Exception($error);
+            }
+        } else {
+            $url = $simplePie->feed_url;
+            $type = 'feed';
         }
-        $url = $simplePie->feed_url;
+
 
         $sid = $this->feedID($url);
         $source = [
             'sourceid' => $sid,
             'sourceurl' => $url,
             'added' => time(),
+            'type' => $type,
         ];
 
         $sql = "SELECT * FROM sources WHERE sourceid = ?";
@@ -534,8 +544,41 @@ class FeedManager
      */
     public function getSources()
     {
-        $sql = "SELECT * FROM sources ORDER BY sourceurl";
+        $sql = "SELECT * FROM sources ORDER BY added DESC";
         return $this->db->queryAll($sql);
+    }
+
+    /**
+     * Fetch a single list source and add new suggestions
+     *
+     * @param array $source A source record
+     * @return int number of added suggestions
+     * @throws Exception
+     */
+    public function fetchSourceList($source)
+    {
+        $lines = file_get_contents($source['sourceurl']);
+        if (!$lines) throw new Exception('Could not fetch source list');
+
+        $lines = explode("\n", $lines);
+        $new = 0;
+        foreach ($lines as $itemUrl) {
+            $itemUrl = trim($itemUrl);
+            if (empty($itemUrl)) continue;
+
+            try {
+                // check if we've seen this item already
+                $this->rememberSourceSuggestion($itemUrl);
+                // add the suggestion
+                $this->suggestFeed($itemUrl);
+                $new++;
+                echo '✓';
+            } catch (Exception $e) {
+                // ignore
+                echo '✗';
+            }
+        }
+        return $new;
     }
 
     /**
@@ -546,6 +589,24 @@ class FeedManager
      * @throws Exception
      */
     public function fetchSource($source)
+    {
+        if ($source['type'] == 'feed') {
+            return $this->fetchSourceFeed($source);
+        } elseif ($source['type'] == 'list') {
+            return $this->fetchSourceList($source);
+        } else {
+            throw new Exception('Unknown source type');
+        }
+    }
+
+    /**
+     * Fetch a single feed source and add new suggestions
+     *
+     * @param array $source A source record
+     * @return int number of added suggestions
+     * @throws Exception
+     */
+    public function fetchSourceFeed($source)
     {
         $simplePie = new SimplePie();
         $simplePie->enable_cache(false);
@@ -561,27 +622,39 @@ class FeedManager
 
         $new = 0;
         foreach ($items as $item) {
-            // check if we've seen this item already
             $itemUrl = $item->get_permalink();
-            $hash = $this->feedID($itemUrl);
-            $sql = "SELECT seen FROM seen WHERE seen = ?";
-            $seen = $this->db->queryValue($sql, [$hash]);
-            if ($seen) continue;
-
-            // remember the item to not suggest it again
-            // we also remember it when it fails to add in the next step to not retry fails
-            $sql = "INSERT INTO seen (seen) VALUES (?)";
-            $this->db->queryValue($sql, [$hash]);
-
-            // add the suggestion
             try {
+                // check if we've seen this item already
+                $this->rememberSourceSuggestion($itemUrl);
+                // add the suggestion
                 $this->suggestFeed($itemUrl);
                 $new++;
+                echo '✓';
             } catch (Exception $e) {
                 // ignore
+                echo '✗';
             }
         }
-
         return $new;
+    }
+
+    /**
+     * Remember that this URL has been suggested in the past
+     *
+     * @param string $itemUrl
+     * @throws Exception if the URL has been suggested before
+     */
+    protected function rememberSourceSuggestion($itemUrl)
+    {
+        $hash = $this->feedID($itemUrl);
+
+        $sql = "SELECT seen FROM seen WHERE seen = ?";
+        $seen = $this->db->queryValue($sql, [$hash]);
+        if ($seen) throw new Exception('Already suggested');
+
+        // remember the item to not suggest it again
+        // we also remember it when it fails to add in the next step to not retry fails
+        $sql = "INSERT INTO seen (seen) VALUES (?)";
+        $this->db->queryValue($sql, [$hash]);
     }
 }

@@ -32,8 +32,8 @@ class CLI extends PSR3CLI
         $options->registerCommand('delete', 'Delete the given feed');
         $options->registerArgument('id', 'Feed id', true, 'delete');
 
-        $options->registerCommand('addSource', 'Add a feed as auto suggestion source');
-        $options->registerArgument('sourceurl', 'The URL to the RSS/Atom feed', true, 'addSource');
+        $options->registerCommand('addSource', 'Add a feed or plain text list as auto suggestion source');
+        $options->registerArgument('sourceurl', 'The URL to the RSS/Atom feed or text list', true, 'addSource');
 
         $options->registerCommand('addHN', 'Add links found in a hackernews post');
         $options->registerArgument('id', 'The ID of the post', true, 'addHN');
