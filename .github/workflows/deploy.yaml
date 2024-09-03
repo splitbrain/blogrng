@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -19,15 +19,20 @@ jobs:
       - name: Run Composer
         run: composer install
 
-      - name: Setup SSH Key
-        uses: shimataro/ssh-key-action@v2
+      # Log in to the GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
         with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # generate with ssh-keyscan -H <server>
-          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Deploy to Server
+      # Build the Docker image
+      - name: Build Docker image
         run: |
-          chmod 777 data
-          rsync -avz ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.TARGET_DIR }}
-        
+          docker build -t ghcr.io/${{ github.repository }}:latest .
+
+      # Push the Docker image to GitHub Container Registry
+      - name: Push Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository }}:latest
