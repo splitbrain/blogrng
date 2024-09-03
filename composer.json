@@ -13,7 +13,7 @@
   ],
   "config": {
     "platform": {
-      "php": "7.4"
+      "php": "8.3"
     }
   },
   "require": {
@@ -22,8 +22,8 @@
     "splitbrain/php-cli": "^1.1",
     "psr/log": "^1.1",
     "ext-json": "*",
-    "twig/twig": "^2.12",
-    "openpsa/universalfeedcreator": "v1.8.4.1",
+    "twig/twig": "^3.12",
+    "openpsa/universalfeedcreator": "^1.9",
     "wa72/url": "^0.7.1",
     "ext-curl": "*",
     "scotteh/php-dom-wrapper": "^2.0",
