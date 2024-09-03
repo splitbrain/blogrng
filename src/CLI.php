@@ -174,7 +174,7 @@ class CLI extends PSR3CLI
             }
         }
         $this->feedManager->db()->exec('VACUUM');
-        return 1;
+        return 0;
     }
 
     /**
