@@ -36,5 +36,5 @@ jobs:
 
       - name: Trigger Watchtower Refresh
         run: |
-          curl -X POST http://watchtower.splitbrain.net/v1/update \
+          curl --fail -X POST https://watchtower.splitbrain.net/v1/update \
           -H "Authorization: Bearer ${{ secrets.WATCHTOWER_HTTP_API_TOKEN }}"
