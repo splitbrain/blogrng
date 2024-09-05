@@ -153,7 +153,7 @@ class CLI extends PSR3CLI
                         'Found {count} new suggestions at {source}',
                         ['count' => $count, 'source' => $source['sourceurl']]
                     );
-                } catch (Exception $e) {
+                } catch (\Throwable $e) {
                     $this->error(
                         'Error fetching suggestions from {source}: {msg}',
                         ['source' => $source['sourceurl'], 'msg' => $e->getMessage()]
@@ -168,7 +168,7 @@ class CLI extends PSR3CLI
             try {
                 $count = $this->feedManager->fetchFeedItems($feed);
                 $this->success('[{feedid}] {count} items found', ['feedid' => $feed['feedid'], 'count' => $count]);
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 $this->error('[{feedid}] {msg}', ['feedid' => $feed['feedid'], 'msg' => $e->getMessage()]);
                 $this->debug($e->getTraceAsString());
             }
