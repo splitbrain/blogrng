@@ -335,8 +335,10 @@ class FeedManager
      */
     public function getAllUpdatableFeeds()
     {
-        $limit = time() - 60 * 60 * 24;
-        $query = "SELECT * FROM feeds WHERE fetched < $limit AND errors < 5 ORDER BY random()";
+        $day = 60 * 60 * 24;
+        $limit = time() - $day;
+        // each error pushes the next retry back by a day
+        $query = "SELECT * FROM feeds WHERE fetched < ($limit - ( errors * $day )) ORDER BY random()";
         return $this->db->queryAll($query);
     }
 
