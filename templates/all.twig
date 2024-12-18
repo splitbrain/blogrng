@@ -46,11 +46,16 @@
                     formatterParams: {
                         labelField: "itemtitle",
                         url: (cell) => {
-                            const url = new URL(cell.getValue());
-                            url.searchParams.set('utm_source', 'indieblog.page');
-                            url.searchParams.set('utm_medium', 'list');
-                            url.searchParams.set('utm_campaign', 'indieblog.page');
-                            return url.toString();
+                            try {
+                                const url = new URL(cell.getValue());
+                                url.searchParams.set('utm_source', 'indieblog.page');
+                                url.searchParams.set('utm_medium', 'list');
+                                url.searchParams.set('utm_campaign', 'indieblog.page');
+                                return url.toString();
+                            } catch (e) {
+                                console.error(e, cell.getValue());
+                                return cell.getValue();
+                            }
                         },
                     },
                     width: 400,
