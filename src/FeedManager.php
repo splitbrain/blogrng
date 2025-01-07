@@ -396,6 +396,8 @@ class FeedManager
         $simplePie->set_feed_url($feed['feedurl']);
         $simplePie->force_feed(true); // no autodetect here
 
+        $domain = parse_url($feed['feedurl'], PHP_URL_HOST);
+
         try {
             if (!$simplePie->init()) {
                 throw new Exception($simplePie->error());
@@ -408,6 +410,10 @@ class FeedManager
             foreach ($items as $item) {
                 $itemUrl = $item->get_permalink();
                 if (!$itemUrl) continue;
+
+                // only keep items from the same domain, ignore external links
+                if(parse_url($itemUrl, PHP_URL_HOST) != $domain) continue;
+
                 $itemTitle = $item->get_title();
                 if (!$itemTitle) continue;
                 $itemDate = $item->get_gmdate('U');
