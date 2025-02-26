@@ -251,7 +251,7 @@ class FeedManager
      */
     public function getSuggestions()
     {
-        $sql = "SELECT * FROM suggestions ORDER BY added DESC";
+        $sql = "SELECT * FROM suggestions ORDER BY added";
         return $this->db->queryAll($sql);
     }
 
