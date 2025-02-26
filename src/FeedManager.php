@@ -5,6 +5,7 @@ namespace splitbrain\blogrng;
 use Exception;
 use PDOException;
 use SimplePie\SimplePie;
+use Wa72\Url\Url;
 
 /**
  * Access and manage the feed database
@@ -224,22 +225,8 @@ class FeedManager
      */
     public function suggestFeed($url)
     {
-        $simplePie = new SimplePie();
-        $simplePie->enable_cache(false);
-        $simplePie->set_feed_url($url);
-        if (!$simplePie->init()) {
-            throw new Exception("Sorry I couldn't find a supported feed at that URL");
-        }
-
-        $url = $simplePie->feed_url;
-        $fid = $this->feedID($url);
-        $feed = [
-            'feedid' => $fid,
-            'feedurl' => $url,
-            'homepage' => $simplePie->get_permalink(),
-            'feedtitle' => $simplePie->get_title(),
-            'added' => time(),
-        ];
+        $feed = $this->getFeedData($url);
+        $fid = $feed['feedid'];
 
         $sql = "SELECT * FROM feeds WHERE feedid = ?";
         $result = $this->db->queryRecord($sql, [$fid]);
@@ -281,13 +268,13 @@ class FeedManager
     }
 
     /**
-     * Adds a new feed
+     * Try to parse the gien feed or homepage and return the feed details
      *
-     * @param string $url Either the feed itself or a website (using autodiscovery)
-     * @return array The feed information
-     * @throws Exception|PDOException
+     * @param string $url
+     * @return array
+     * @throws Exception
      */
-    public function addFeed($url)
+    protected function getFeedData($url, $mastodon = false)
     {
         $simplePie = new SimplePie();
         $simplePie->enable_cache(false);
@@ -296,7 +283,7 @@ class FeedManager
         try {
             $ok = $simplePie->init();
         } catch (\Throwable $e) {
-            throw new Exception('SimplePie error ' . $e->getMessage());
+            throw new Exception("Sorry I couldn't find a supported feed at that URL. " . $e->getMessage());
         }
 
         if (!$ok) {
@@ -305,18 +292,45 @@ class FeedManager
 
         $url = $simplePie->feed_url;
         $fid = $this->feedID($url);
+
+        $homepage = trim($simplePie->get_permalink());
+        if (!$homepage) {
+            $hp = new Url($url);
+            $hp = $hp->withPath($hp->getDirname());
+            $homepage = $hp->__toString();
+        }
+
+        $title = trim($simplePie->get_title());
+        if (!$title) {
+            $title = parse_url($homepage, PHP_URL_HOST);
+        }
+
         $feed = [
             'feedid' => $fid,
             'feedurl' => $url,
-            'homepage' => $simplePie->get_permalink(),
-            'mastodon' => (new Mastodon())->getProfile($simplePie->get_permalink()),
-            'feedtitle' => $simplePie->get_title(),
+            'homepage' => $homepage,
+            'feedtitle' => $title,
             'added' => time(),
         ];
 
-        if (empty($feed['feedtitle'])) {
-            $feed['feedtitle'] = parse_url($feed['homepage'], PHP_URL_HOST);
+        if ($mastodon) {
+            $feed['mastodon'] = (new Mastodon())->getProfile($homepage);
         }
+
+        return $feed;
+    }
+
+    /**
+     * Adds a new feed
+     *
+     * @param string $url Either the feed itself or a website (using autodiscovery)
+     * @return array The feed information
+     * @throws Exception|PDOException
+     */
+    public function addFeed($url)
+    {
+        $feed = $this->getFeedData($url, true);
+        $fid = $feed['feedid'];
 
         $sql = "SELECT * FROM feeds WHERE feedid = ?";
         $result = $this->db->queryRecord($sql, [$fid]);
@@ -412,7 +426,7 @@ class FeedManager
                 if (!$itemUrl) continue;
 
                 // only keep items from the same domain, ignore external links
-                if(parse_url($itemUrl, PHP_URL_HOST) != $domain) continue;
+                if (parse_url($itemUrl, PHP_URL_HOST) != $domain) continue;
 
                 $itemTitle = $item->get_title();
                 if (!$itemTitle) continue;
