@@ -32,6 +32,8 @@ class CLI extends PSR3CLI
         $options->registerCommand('delete', 'Delete the given feed');
         $options->registerArgument('id', 'Feed id', true, 'delete');
 
+        $options->registerCommand('listSources', 'List all auto suggestion sources');
+
         $options->registerCommand('addSource', 'Add a feed or plain text list as auto suggestion source');
         $options->registerArgument('sourceurl', 'The URL to the RSS/Atom feed or text list', true, 'addSource');
 
@@ -69,6 +71,8 @@ class CLI extends PSR3CLI
                 return $this->delete($args[0]);
             case 'config':
                 return $this->config($args[0], $args[1]);
+            case 'listSources':
+                return $this->listSources();
             case 'addSource':
                 return $this->addSource($args[0]);
             case 'addHN':
@@ -134,6 +138,20 @@ class CLI extends PSR3CLI
             $this->debug($e->getTraceAsString());
             return 1;
         }
+    }
+
+    /**
+     * List all sources
+     *
+     * @return int
+     */
+    protected function listSources()
+    {
+        $sources = $this->feedManager->getSources();
+        foreach ($sources as $source) {
+            $this->info('{type}: {sourceurl}',  $source);
+        }
+        return 0;
     }
 
     /**

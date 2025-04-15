@@ -530,8 +530,10 @@ class FeedManager
         $simplePie->set_feed_url($url);
         if (!$simplePie->init()) {
             $error = $simplePie->error();
-            if ($simplePie->status_code() == 200 && strpos($error, 'text/plain') !== false) {
+            if ($simplePie->status_code() == 200 && str_contains($error, 'text/plain')) {
                 $type = 'list';
+            } elseif ($simplePie->status_code() == 200 && str_starts_with($simplePie->get_raw_data(), '<opml')) {
+                $type = 'opml';
             } else {
                 throw new Exception($error);
             }
@@ -604,6 +606,41 @@ class FeedManager
     }
 
     /**
+     * Fetch a single OPML source and add new suggestions
+     *
+     * @param array $source A source record
+     * @return int number of added suggestions
+     * @throws Exception
+     */
+    public function fetchSourceOpml($source)
+    {
+        $lines = file_get_contents($source['sourceurl']);
+        if (!$lines) throw new Exception('Could not fetch source list');
+
+        $xml = simplexml_load_string($lines);
+        if (!$xml) throw new Exception('Could not parse OPML');
+
+        $new = 0;
+        foreach ($xml->body->outline as $item) {
+            $itemUrl = (string)$item['xmlUrl'];
+            if (empty($itemUrl)) continue;
+
+            try {
+                // check if we've seen this item already
+                $this->rememberSourceSuggestion($itemUrl);
+                // add the suggestion
+                $this->suggestFeed($itemUrl);
+                $new++;
+                echo '✓';
+            } catch (Exception $e) {
+                // ignore
+                echo '✗';
+            }
+        }
+        return $new;
+    }
+
+    /**
      * Fetch a single source and add new suggestions
      *
      * @param array $source A source record
@@ -616,6 +653,8 @@ class FeedManager
             return $this->fetchSourceFeed($source);
         } elseif ($source['type'] == 'list') {
             return $this->fetchSourceList($source);
+        } elseif ($source['type'] == 'opml') {
+            return $this->fetchSourceOpml($source);
         } else {
             throw new Exception('Unknown source type');
         }
