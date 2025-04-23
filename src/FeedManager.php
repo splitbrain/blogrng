@@ -381,7 +381,7 @@ class FeedManager
 
         $query = "SELECT *
                     FROM feeds A
-              INNER JOIN (SELECT feedid,
+              LEFT JOIN (SELECT feedid,
                                  itemid,
                                  itemurl,
                                  itemtitle,

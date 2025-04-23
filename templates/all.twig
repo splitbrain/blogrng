@@ -59,9 +59,6 @@
             initialSort: [
                 {column: "published", dir: "desc"},
             ],
-            initialHeaderFilter:[
-                {field:"errors", value:"0"},
-            ],
             sortOrderReverse: true,
             columnDefaults: {
                 headerFilterPlaceholder: "filter",
@@ -82,15 +79,17 @@
                     formatterParams: {
                         labelField: "itemtitle",
                         url: (cell) => {
+                            const value = cell.getValue();
+                            if (value === '') return '';
                             try {
-                                const url = new URL(cell.getValue());
+                                const url = new URL(value);
                                 url.searchParams.set('utm_source', 'indieblog.page');
                                 url.searchParams.set('utm_medium', 'list');
                                 url.searchParams.set('utm_campaign', 'indieblog.page');
                                 return url.toString();
                             } catch (e) {
                                 console.error(e, cell.getValue());
-                                return cell.getValue();
+                                return value;
                             }
                         },
                     },
@@ -103,7 +102,9 @@
                     width: 80,
                     hozAlign: "right",
                     formatter: (cell) => {
-                        return (new Date(cell.getValue() * 1000)).toISOString().split('T')[0];
+                        const value = cell.getValue();
+                        if (!value) return '';
+                        return (new Date(value * 1000)).toISOString().split('T')[0];
                     },
                 },
                 {
@@ -184,6 +185,7 @@
                 {
                     title: "Last Error",
                     field: "lasterror",
+                    width: 400,
                 },
             ],
         });
