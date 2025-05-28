@@ -379,7 +379,7 @@ class FeedManager
     {
         $errorlimit = $witherrors ? 100 : 0;
 
-        $query = "SELECT *
+        $query = "SELECT A.feedid AS feedid, *
                     FROM feeds A
               LEFT JOIN (SELECT feedid,
                                  itemid,
