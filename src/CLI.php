@@ -29,6 +29,9 @@ class CLI extends PSR3CLI
         $options->registerCommand('inspect', 'Inspect the given feed or item');
         $options->registerArgument('id', 'Feed or item id', true, 'inspect');
 
+        $options->registerCommand('fetch', 'Fetch the items for a single feed');
+        $options->registerArgument('id', 'Feed id', true, 'fetch');
+
         $options->registerCommand('delete', 'Delete the given feed');
         $options->registerArgument('id', 'Feed id', true, 'delete');
 
@@ -67,6 +70,8 @@ class CLI extends PSR3CLI
                 return $this->updateFeeds($options->getOpt('skipsources', false));
             case 'inspect':
                 return $this->inspect($args[0]);
+            case 'fetch':
+                return $this->fetchFeed($args[0]);
             case 'delete':
                 return $this->delete($args[0]);
             case 'config':
@@ -152,6 +157,30 @@ class CLI extends PSR3CLI
             $this->info('{type}: {sourceurl}',  $source);
         }
         return 0;
+    }
+
+    /**
+     * Update a single feed
+     *
+     * @param string $feedId
+     * @return int
+     */
+    protected function fetchFeed($feedId)
+    {
+        $feed = $this->feedManager->getFeed($feedId);
+        if(!$feed) {
+            $this->error('Feed not found');
+            return 1;
+        }
+        try {
+            $count = $this->feedManager->fetchFeedItems($feed);
+            $this->success('[{feedid}] {count} items found', ['feedid' => $feed['feedid'], 'count' => $count]);
+            return 0;
+        } catch (\Throwable $e) {
+            $this->error('[{feedid}] {msg}', ['feedid' => $feed['feedid'], 'msg' => $e->getMessage()]);
+            $this->debug($e->getTraceAsString());
+            return 1;
+        }
     }
 
     /**
