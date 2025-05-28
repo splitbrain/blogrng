@@ -139,6 +139,16 @@
                     },
                 },
                 {
+                    title: "Fetched",
+                    field: "fetched",
+                    sorter: "number",
+                    width: 80,
+                    hozAlign: "right",
+                    formatter: (cell) => {
+                        return (new Date(cell.getValue() * 1000)).toISOString().split('T')[0];
+                    },
+                },
+                {
                     title: "Feed",
                     field: "feedurl",
                     formatter: "link",
