@@ -363,7 +363,7 @@ class FeedManager
      */
     public function getAllFeeds()
     {
-        $query = "SELECT * FROM feeds WHERE errors = 0 ORDER BY feedurl";
+        $query = "SELECT * FROM feeds WHERE errors = 0 ORDER BY added DESC";
         return $this->db->queryAll($query);
     }
 
@@ -391,7 +391,7 @@ class FeedManager
                          ) B 
                       ON A.feedid = B.feedid
                    WHERE errors <= $errorlimit
-                ORDER BY A.feedurl";
+                ORDER BY A.added DESC";
 
         $stmt = $this->db->pdo()->prepare($query);
         $stmt->execute();

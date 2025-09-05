@@ -151,6 +151,29 @@ class Controller
         $stmt->closeCursor();
     }
 
+    public function opml()
+    {
+        $feeds = $this->feedManager->getAllFeeds();
+        header('Content-Type: text/xml');
+        echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        echo '<opml version="1.0">' . "\n";
+        echo '  <head>' . "\n";
+        echo '    <title>indieblog.page</title>' . "\n";
+        echo '    <dateCreated>' . date(DATE_RFC822) . '</dateCreated>' . "\n";
+        echo '  </head>' . "\n";
+        echo '  <body>' . "\n";
+        foreach ($feeds as $feed) {
+            echo '    <outline type="rss"';
+            echo ' text="' . htmlspecialchars($feed['feedtitle']) . '"';
+            echo ' title="' . htmlspecialchars($feed['feedtitle']) . '"';
+            echo ' xmlUrl="' . htmlspecialchars($feed['feedurl']) . '"';
+            echo ' htmlUrl="' . htmlspecialchars($feed['homepage']) . '"';
+            echo ' />' . "\n";
+        }
+        echo '  </body>' . "\n";
+        echo '</opml>' . "\n";
+    }
+
     public function admin()
     {
         $this->requireAuth();
@@ -187,10 +210,10 @@ class Controller
         $this->requireAuth();
         $context = [];
 
-        if(isset($_REQUEST['id'])){
+        if (isset($_REQUEST['id'])) {
             $id = substr($_REQUEST['id'], 0, 32);
 
-            if(!empty($_REQUEST['reset'])) {
+            if (!empty($_REQUEST['reset'])) {
                 try {
                     $this->feedManager->resetFeedErrors($id);
                 } catch (\Exception $ignored) {
