@@ -53,6 +53,9 @@ class CLI extends PSR3CLI
 
         $options->registerCommand('rss', 'Generate the RSS feeds');
         $options->registerOption('force', 'Force a refresh of the feed', 'f', false, 'rss');
+
+        $options->registerCommand('wrapped', 'Wrap up the year');
+        $options->registerOption('year', 'The year to wrap up', 'y', false, 'wrapped');
     }
 
     /** @inheritdoc */
@@ -88,10 +91,44 @@ class CLI extends PSR3CLI
                 return $this->postRandom();
             case 'rss';
                 return $this->rss($options->getOpt('force', false));
+            case 'wrapped';
+                $year = (int)$options->getOpt('year', date('Y'));
+                return $this->wrapped($year);
             default:
                 echo $options->help();
                 return 0;
         }
+    }
+
+    protected function wrapped($year)
+    {
+        $wrapped = new Wrapped();
+        $current = $wrapped->all((int)$year);
+        $last = $wrapped->all((int)$year - 1);
+
+        $errors = number_format($current['thisYearFeedsWithErrors'] + $last['thisYearFeedsWithErrors']);
+        $current = array_map('number_format', $current);
+        $last = array_map('number_format', $last);
+        $lastyear = $year - 1;
+        $nextyear = $year + 1;
+
+
+        echo <<<EOT
+            IndieBlog.page Wrapped {$year} ✨
+
+            This year, the index grew {$current['newFeeds']} new blogs 🆕, bringing the total to {$current['allFeeds']} active blogs.
+            
+            Together, these blogs published {$current['newPosts']} new posts in {$year} ✍️ (compared to {$last['newPosts']} last year 📈).
+
+            {$current['feedsWithNoPosts']} blogs didn’t publish anything this year 😴 — {$current['lastYearFeedsWithNoPosts']} of them were only added in {$lastyear} 😲.
+
+            In total, {$current['overallFeedsWithErrors']} blogs that were once part of IndieBlog.page now return errors and may have shut down ⚠️.
+            {$errors} of those were added in {$lastyear} or {$year} 😞.
+            
+            Happy blogging in {$nextyear}! 🎉
+            EOT;
+
+        return 0;
     }
 
     /**
@@ -154,7 +191,7 @@ class CLI extends PSR3CLI
     {
         $sources = $this->feedManager->getSources();
         foreach ($sources as $source) {
-            $this->info('{type}: {sourceurl}',  $source);
+            $this->info('{type}: {sourceurl}', $source);
         }
         return 0;
     }
@@ -168,7 +205,7 @@ class CLI extends PSR3CLI
     protected function fetchFeed($feedId)
     {
         $feed = $this->feedManager->getFeed($feedId);
-        if(!$feed) {
+        if (!$feed) {
             $this->error('Feed not found');
             return 1;
         }
@@ -383,7 +420,7 @@ class CLI extends PSR3CLI
                 $feed = $this->feedManager->addFeed($url);
                 $this->success('{url} {feedid} added', ['url' => $url, 'feedid' => $feed['feedid']]);
             } catch (Exception $e) {
-                $this->error($url.' '.$e->getMessage());
+                $this->error($url . ' ' . $e->getMessage());
             }
         }
     }
