@@ -200,7 +200,12 @@ class Controller
             }
         }
 
+        if (isset($_POST['blocklist'])) {
+            $this->feedManager->setBlocklist(explode("\n", $_POST['blocklist']));
+        }
+
         $context['suggestions'] = $this->feedManager->getSuggestions();
+        $context['blocklist'] = $this->feedManager->getBlocklist();
 
         echo $this->twig->render('admin.twig', $context);
     }
