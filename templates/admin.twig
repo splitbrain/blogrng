@@ -37,4 +37,12 @@
         </p>
     </form>
 
+    <form action="admin" method="post">
+        <p>
+            <label for="blocklist">Blocked domains (one per line):</label><br>
+            <textarea id="blocklist" name="blocklist" rows="10">{{ blocklist|join("\n") }}</textarea><br>
+            <button type="submit">Save</button>
+        </p>
+    </form>
+
 {% endblock %}

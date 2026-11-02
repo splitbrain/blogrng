@@ -240,6 +240,9 @@ class FeedManager
             throw new Exception("This feed has already been suggested");
         }
 
+        // feeds on blocked domains are dropped silently
+        if ($this->isBlocked($feed)) return $feed;
+
         $this->db->saveRecord('suggestions', $feed);
         return $feed;
     }
@@ -265,6 +268,63 @@ class FeedManager
     {
         $sql = "DELETE FROM suggestions WHERE feedid = ?";
         $this->db->exec($sql, [$feedid]);
+    }
+
+    /**
+     * Get all blocked domains
+     *
+     * @return string[]
+     */
+    public function getBlocklist()
+    {
+        $sql = "SELECT domain FROM blocklist ORDER BY domain";
+        return array_column($this->db->queryAll($sql), 'domain');
+    }
+
+    /**
+     * Replace the blocked domains and remove all suggestions on these domains
+     *
+     * @param string[] $domains
+     * @return void
+     */
+    public function setBlocklist($domains)
+    {
+        $domains = array_map(fn($domain) => strtolower(trim($domain)), $domains);
+        $domains = array_unique(array_filter($domains));
+
+        $this->db->pdo()->beginTransaction();
+        $this->db->exec("DELETE FROM blocklist");
+        foreach ($domains as $domain) {
+            $this->db->saveRecord('blocklist', ['domain' => $domain]);
+        }
+        $this->db->pdo()->commit();
+
+        foreach ($this->getSuggestions() as $feed) {
+            if ($this->isBlocked($feed)) $this->removeSuggestion($feed['feedid']);
+        }
+    }
+
+    /**
+     * Check if the feed or homepage URL of a feed is on a blocked domain
+     *
+     * Subdomains of a blocked domain are blocked too.
+     *
+     * @param array $feed A feed record with feedurl and homepage
+     * @return bool
+     */
+    protected function isBlocked($feed)
+    {
+        $hosts = [
+            strtolower((string)parse_url($feed['feedurl'], PHP_URL_HOST)),
+            strtolower((string)parse_url($feed['homepage'], PHP_URL_HOST)),
+        ];
+
+        foreach ($this->getBlocklist() as $domain) {
+            foreach ($hosts as $host) {
+                if ($host === $domain || str_ends_with($host, '.' . $domain)) return true;
+            }
+        }
+        return false;
     }
 
     /**
