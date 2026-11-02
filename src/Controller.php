@@ -205,6 +205,44 @@ class Controller
         echo $this->twig->render('admin.twig', $context);
     }
 
+    /**
+     * Review the suggestions one at a time
+     *
+     * A GET request shows the review page. A POST request approves or rejects a suggestion
+     * and returns the result as JSON.
+     *
+     * @return void
+     */
+    public function review()
+    {
+        $this->requireAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $context = ['suggestions' => $this->feedManager->getSuggestions()];
+            echo $this->twig->render('review.twig', $context);
+            return;
+        }
+
+        header('Content-Type: application/json');
+        try {
+            switch ($_POST['action'] ?? '') {
+                case 'approve':
+                    $feed = $this->feedManager->addFeed($_POST['feedurl'] ?? '');
+                    $this->feedManager->removeSuggestion($feed['feedid']);
+                    break;
+                case 'reject':
+                    $this->feedManager->removeSuggestion($_POST['feedid'] ?? '');
+                    break;
+                default:
+                    throw new \Exception('Unknown action');
+            }
+            echo json_encode(['ok' => true]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+
     public function inspect()
     {
         $this->requireAuth();

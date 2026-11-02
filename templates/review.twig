@@ -1,0 +1,34 @@
+{% extends 'partials/layout.twig' %}
+
+{% block content %}
+    <h2>Review</h2>
+
+    <div id="review" data-suggestions="{{ suggestions|json_encode }}">
+        <p>
+            <span class="review-count"></span> suggestions left.
+            <button class="review-start">Open Preview</button>
+        </p>
+
+        <div class="review-current">
+            <p>
+                <strong class="review-title"></strong><br>
+                Homepage: <a class="review-homepage" target="blogreview-preview"></a><br>
+                Feed: <a class="review-feedurl" target="_blank"></a>
+            </p>
+
+            <p>
+                <button data-action="approve" title="Key: a">Approve</button>
+                <button data-action="reject" title="Key: r">Reject</button>
+                <button data-action="skip" title="Key: s">Skip</button>
+            </p>
+        </div>
+
+        <p class="review-done" hidden>No more suggestions.</p>
+
+        <ul class="review-queue"></ul>
+    </div>
+
+    <p>
+        <a href="admin">Back to the admin page</a>
+    </p>
+{% endblock %}
